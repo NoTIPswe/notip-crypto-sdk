@@ -1,0 +1,26 @@
+{
+  "name": "NoTIP crypto-sdk Dev",
+
+  "image": "ghcr.io/notipswe/notip-ts-dev:v0.0.1",
+
+  "postCreateCommand": "[ -f package.json ] && npm install; pre-commit install --install-hooks",
+  "init": true,
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "SonarSource.sonarlint-vscode",
+        "ms-azuretools.vscode-containers",
+        "redhat.vscode-yaml"
+      ]
+    }
+  },
+
+  "forwardPorts": [3000],
+
+  "workspaceFolder": "/workspaces/notip-crypto-sdk",
+  "updateRemoteUserUID": true,
+  "remoteUser": "node"
+}
