@@ -1,5 +1,6 @@
 import type { Config } from "./config.js";
-import { SdkError } from "./errors.js";
+import { SdkError, ValidationError } from "./errors.js";
+import { zKeysControllerGetKeysResponse } from "./generated/notip-management-api-openapi.js";
 import { authorizedFetch } from "./http.js";
 import type { KeyDTO } from "./models.js";
 
@@ -8,7 +9,14 @@ export class ManagementApiClient {
 
     async getAllKeys(): Promise<KeyDTO[]> {
         const response = await authorizedFetch(this.config, "/keys");
-        return (await response.json()) as KeyDTO[];
+        const raw: unknown = await response.json();
+        const validated = zKeysControllerGetKeysResponse.safeParse(raw);
+        if (!validated.success) {
+            throw new ValidationError("Invalid keys response", {
+                cause: validated.error,
+            });
+        }
+        return validated.data;
     }
 
     async getGatewayKey(gatewayId: string, version: number): Promise<KeyDTO> {
@@ -16,7 +24,14 @@ export class ManagementApiClient {
             this.config,
             `/keys?id=${encodeURIComponent(gatewayId)}`
         );
-        const keys = (await response.json()) as KeyDTO[];
+        const raw: unknown = await response.json();
+        const validated = zKeysControllerGetKeysResponse.safeParse(raw);
+        if (!validated.success) {
+            throw new ValidationError("Invalid keys response", {
+                cause: validated.error,
+            });
+        }
+        const keys = validated.data;
         const match = keys.find((k) => k.key_version === version);
 
         if (!match) {

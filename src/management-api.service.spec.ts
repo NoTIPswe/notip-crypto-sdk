@@ -42,7 +42,7 @@ describe("ManagementApiService", () => {
         ]);
     });
 
-    it("should throw ValidationError on invalid response shape", async () => {
+    it("should propagate ValidationError on invalid response shape", async () => {
         const fetcher = vi
             .fn()
             .mockResolvedValue(jsonResponse([{ bad: "data" }]));

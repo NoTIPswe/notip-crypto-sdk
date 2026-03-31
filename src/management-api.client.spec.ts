@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 
 import type { Config } from "./config.js";
-import { ApiError, SdkError } from "./errors.js";
+import { ApiError, SdkError, ValidationError } from "./errors.js";
 import { ManagementApiClient } from "./management-api.client.js";
 import type { KeyDTO } from "./models.js";
 
@@ -55,6 +55,15 @@ describe("ManagementApiClient", () => {
             const client = new ManagementApiClient(createConfig(fetcher));
 
             await expect(client.getAllKeys()).rejects.toThrow(ApiError);
+        });
+
+        it("should throw ValidationError on invalid DTO shape", async () => {
+            const fetcher = vi
+                .fn()
+                .mockResolvedValue(jsonResponse([{ bad: "shape" }]));
+            const client = new ManagementApiClient(createConfig(fetcher));
+
+            await expect(client.getAllKeys()).rejects.toThrow(ValidationError);
         });
     });
 

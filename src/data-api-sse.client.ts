@@ -1,7 +1,8 @@
 import { fetchEventSource } from "@microsoft/fetch-event-source";
 
 import type { Config } from "./config.js";
-import { SdkError } from "./errors.js";
+import { SdkError, ValidationError } from "./errors.js";
+import { zEncryptedEnvelopeDto } from "./generated/notip-data-api-openapi.js";
 import type { EncryptedEnvelopeDTO } from "./models.js";
 
 interface QueueItem<T> {
@@ -75,9 +76,29 @@ export class DataApiSseClient {
                 openWhenHidden: true,
                 onmessage(ev) {
                     if (ev.data) {
-                        channel.push(
-                            JSON.parse(ev.data) as EncryptedEnvelopeDTO
-                        );
+                        try {
+                            const raw: unknown = JSON.parse(ev.data);
+                            const validated =
+                                zEncryptedEnvelopeDto.safeParse(raw);
+                            if (!validated.success) {
+                                channel.error(
+                                    new ValidationError(
+                                        "Invalid stream envelope",
+                                        {
+                                            cause: validated.error,
+                                        }
+                                    )
+                                );
+                                return;
+                            }
+                            channel.push(validated.data);
+                        } catch (err) {
+                            channel.error(
+                                new ValidationError("Invalid stream envelope", {
+                                    cause: err,
+                                })
+                            );
+                        }
                     }
                 },
                 onclose() {

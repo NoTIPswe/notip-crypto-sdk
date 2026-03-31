@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 import type { Config } from "./config.js";
 import { DataApiSseClient } from "./data-api-sse.client.js";
+import { ValidationError } from "./errors.js";
 import type { EncryptedEnvelopeDTO } from "./models.js";
 
 vi.mock("@microsoft/fetch-event-source", () => ({
@@ -126,5 +127,24 @@ describe("DataApiSseClient", () => {
         }
 
         expect(results).toHaveLength(1);
+    });
+
+    it("should throw ValidationError for invalid envelope DTO", async () => {
+        mockedFetchEventSource.mockImplementation((_url, opts) => {
+            opts?.onmessage?.({
+                data: JSON.stringify({ bad: "shape" }),
+                id: "1",
+                event: "",
+            });
+            return Promise.resolve();
+        });
+
+        const client = new DataApiSseClient(createConfig());
+
+        await expect(async () => {
+            for await (const envelope of client.stream("")) {
+                expect(envelope).toBeDefined();
+            }
+        }).rejects.toThrow(ValidationError);
     });
 });

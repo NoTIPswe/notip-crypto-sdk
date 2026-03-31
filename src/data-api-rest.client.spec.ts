@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 
 import type { Config } from "./config.js";
 import { DataApiRestClient } from "./data-api-rest.client.js";
-import { ApiError } from "./errors.js";
+import { ApiError, ValidationError } from "./errors.js";
 import type {
     EncryptedEnvelopeDTO,
     QueryResponseDTO,
@@ -77,6 +77,17 @@ describe("DataApiRestClient", () => {
 
             await expect(client.query("bad")).rejects.toThrow(ApiError);
         });
+
+        it("should throw ValidationError for invalid query DTO", async () => {
+            const fetcher = vi
+                .fn()
+                .mockResolvedValue(jsonResponse({ bad: "shape" }));
+            const client = new DataApiRestClient(createConfig(fetcher));
+
+            await expect(client.query("from=a&to=b")).rejects.toThrow(
+                ValidationError
+            );
+        });
     });
 
     describe("export", () => {
@@ -95,6 +106,17 @@ describe("DataApiRestClient", () => {
                 "https://api.example.com/measures/export?from=2026-01-01&to=2026-01-02"
             );
         });
+
+        it("should throw ValidationError for invalid export DTO", async () => {
+            const fetcher = vi
+                .fn()
+                .mockResolvedValue(jsonResponse([{ bad: "shape" }]));
+            const client = new DataApiRestClient(createConfig(fetcher));
+
+            await expect(client.export("from=a&to=b")).rejects.toThrow(
+                ValidationError
+            );
+        });
     });
 
     describe("getAllSensors", () => {
@@ -110,6 +132,17 @@ describe("DataApiRestClient", () => {
 
             const [url] = fetcher.mock.calls[0] as [string, RequestInit];
             expect(url).toBe("https://api.example.com/sensor");
+        });
+
+        it("should throw ValidationError for invalid sensor DTO", async () => {
+            const fetcher = vi
+                .fn()
+                .mockResolvedValue(jsonResponse([{ bad: "shape" }]));
+            const client = new DataApiRestClient(createConfig(fetcher));
+
+            await expect(client.getAllSensors()).rejects.toThrow(
+                ValidationError
+            );
         });
     });
 

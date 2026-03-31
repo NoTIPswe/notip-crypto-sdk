@@ -1,12 +1,6 @@
 import type { Config } from "./config.js";
 import { CryptoEngine } from "./crypto-engine.js";
 import { ValidationError } from "./errors.js";
-import {
-    zEncryptedEnvelopeDto,
-    zMeasureControllerExportResponse,
-    zQueryResponseDto,
-    zSensorControllerGetSensorsResponse,
-} from "./generated/notip-data-api-openapi.js";
 import { KeyManager } from "./key-manager.js";
 import { ManagementApiClient } from "./management-api.client.js";
 import { DataApiRestClient } from "./data-api-rest.client.js";
@@ -42,6 +36,7 @@ export class DataApiService {
 
     constructor(config: Config) {
         const mgmtClient = new ManagementApiClient(config);
+
         this.restClient = new DataApiRestClient(config);
         this.sseClient = new DataApiSseClient(config);
         this.keyManager = new KeyManager(mgmtClient);
@@ -50,17 +45,10 @@ export class DataApiService {
 
     async queryMeasures(query: QueryModel): Promise<PlaintextMeasure[]> {
         const params = toSearchParams(query);
-        const raw = await this.restClient.query(params);
-
-        const validated = zQueryResponseDto.safeParse(raw);
-        if (!validated.success) {
-            throw new ValidationError("Invalid query response", {
-                cause: validated.error,
-            });
-        }
+        const response = await this.restClient.query(params);
 
         const results: PlaintextMeasure[] = [];
-        for (const envelope of validated.data.data) {
+        for (const envelope of response.data) {
             results.push(await this.decryptEnvelope(envelope));
         }
         return results;
@@ -71,14 +59,8 @@ export class DataApiService {
     ): AsyncGenerator<PlaintextMeasure> {
         const params = toSearchParams(query);
 
-        for await (const raw of this.sseClient.stream(params)) {
-            const validated = zEncryptedEnvelopeDto.safeParse(raw);
-            if (!validated.success) {
-                throw new ValidationError("Invalid stream envelope", {
-                    cause: validated.error,
-                });
-            }
-            yield this.decryptEnvelope(validated.data);
+        for await (const envelope of this.sseClient.stream(params)) {
+            yield this.decryptEnvelope(envelope);
         }
     }
 
@@ -86,31 +68,17 @@ export class DataApiService {
         query: ExportModel
     ): AsyncGenerator<PlaintextMeasure> {
         const params = toSearchParams(query);
-        const raw = await this.restClient.export(params);
+        const envelopes = await this.restClient.export(params);
 
-        const validated = zMeasureControllerExportResponse.safeParse(raw);
-        if (!validated.success) {
-            throw new ValidationError("Invalid export response", {
-                cause: validated.error,
-            });
-        }
-
-        for (const envelope of validated.data) {
+        for (const envelope of envelopes) {
             yield this.decryptEnvelope(envelope);
         }
     }
 
     async getSensors(): Promise<SensorModel[]> {
-        const raw = await this.restClient.getAllSensors();
+        const sensors = await this.restClient.getAllSensors();
 
-        const validated = zSensorControllerGetSensorsResponse.safeParse(raw);
-        if (!validated.success) {
-            throw new ValidationError("Invalid sensors response", {
-                cause: validated.error,
-            });
-        }
-
-        return validated.data.map((dto) => ({
+        return sensors.map((dto) => ({
             sensorId: dto.sensorId,
             sensorType: dto.sensorType,
             gatewayId: dto.gatewayId,
@@ -119,16 +87,9 @@ export class DataApiService {
     }
 
     async getGatewaySensors(gatewayId: string): Promise<SensorModel[]> {
-        const raw = await this.restClient.getGatewaySensors(gatewayId);
+        const sensors = await this.restClient.getGatewaySensors(gatewayId);
 
-        const validated = zSensorControllerGetSensorsResponse.safeParse(raw);
-        if (!validated.success) {
-            throw new ValidationError("Invalid sensors response", {
-                cause: validated.error,
-            });
-        }
-
-        return validated.data.map((dto) => ({
+        return sensors.map((dto) => ({
             sensorId: dto.sensorId,
             sensorType: dto.sensorType,
             gatewayId: dto.gatewayId,

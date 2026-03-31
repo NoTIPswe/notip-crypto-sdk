@@ -180,7 +180,7 @@ describe("DataApiService", () => {
             });
         });
 
-        it("should throw ValidationError on invalid query response", async () => {
+        it("should propagate ValidationError on invalid query response", async () => {
             const config = createConfig({
                 "/measures/query": () => ({ bad: "shape" }),
                 "/keys": () => [],
