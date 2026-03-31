@@ -1,14 +1,24 @@
 {
-  "compilerOptions": {
-    "target": "ES2022",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "lib": ["ES2022", "DOM", "WebWorker"],
-    "strict": true,
-    "noEmit": true,
-    "skipLibCheck": true,
-    "verbatimModuleSyntax": true,
-    "isolatedModules": true
-  },
-  "include": ["src"]
+    "compilerOptions": {
+        "target": "ES2022",
+        "module": "ES2022",
+        "moduleResolution": "bundler",
+
+        "strict": true,
+        "noUncheckedIndexedAccess": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+
+        "outDir": "dist",
+        // the build is handled by tsup, we set rootDir to "." to include both `src` and `tests` for the other tools
+        "rootDir": ".",
+        "declaration": true,
+        "declarationMap": true,
+
+        "lib": ["ES2022"],
+
+        "isolatedModules": true,
+        "skipLibCheck": true
+    },
+    "include": ["src", "tests"]
 }

@@ -1,6 +1,7 @@
 # yaml-language-server: $schema=https://www.schemastore.org/prettierrc.json
 
 trailingComma: es5
-tabWidth: 2
+tabWidth: 4
 semi: true
-singleQuote: true
+singleQuote: false
+printWidth: 80
