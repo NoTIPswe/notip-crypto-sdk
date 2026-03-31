@@ -9,7 +9,6 @@ export {
 } from "./errors.js";
 
 export { DataApiService } from "./data-api.service.js";
-export { ManagementApiService } from "./management-api.service.js";
 
 export type {
     PlaintextMeasure,
