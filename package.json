@@ -27,13 +27,16 @@
         "check:typecheck": "tsc --noEmit",
         "check:eslint": "eslint",
         "check": "npm run check:format && npm run check:typecheck && npm run check:eslint",
-        "prepublishOnly": "npm run check && npm run build"
+        "prepublishOnly": "npm run check && npm run test && npm run build"
     },
     "devDependencies": {
+        "@semantic-release/changelog": "^6.0.3",
+        "@semantic-release/git": "^10.0.1",
         "@vitest/coverage-v8": "^4.0.0",
         "dotenv-cli": "^8.0.0",
         "eslint": "^10.0.0",
         "prettier": "^3.0.0",
+        "semantic-release": "^25.0.3",
         "tsup": "^8.0.0",
         "typescript": "^5.0.0",
         "typescript-eslint": "^8.0.0",
