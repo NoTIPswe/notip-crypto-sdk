@@ -1,0 +1,131 @@
+import { describe, it, expect, vi } from "vitest";
+
+import type { Config } from "./config.js";
+import { DataApiRestClient } from "./data-api-rest.client.js";
+import { ApiError } from "./errors.js";
+import type {
+    EncryptedEnvelopeDTO,
+    QueryResponseDTO,
+    SensorDTO,
+} from "./models.js";
+
+function createConfig(fetcher: Config["fetcher"]): Config {
+    return {
+        baseUrl: "https://api.example.com",
+        tokenProvider: () => "test-token",
+        fetcher,
+    };
+}
+
+function jsonResponse(body: unknown, status = 200): Response {
+    return new Response(JSON.stringify(body), {
+        status,
+        headers: { "Content-Type": "application/json" },
+    });
+}
+
+const stubEnvelope: EncryptedEnvelopeDTO = {
+    gatewayId: "gw-1",
+    sensorId: "sensor-1",
+    sensorType: "temperature",
+    timestamp: "2026-03-23T09:58:00.000Z",
+    encryptedData: "abcd",
+    iv: "1234",
+    authTag: "5678",
+    keyVersion: 1,
+};
+
+const stubQueryResponse: QueryResponseDTO = {
+    data: [stubEnvelope],
+    hasMore: false,
+};
+
+const stubSensor: SensorDTO = {
+    sensorId: "sensor-1",
+    sensorType: "temperature",
+    gatewayId: "gw-1",
+    lastSeen: "2026-03-23T09:58:00.000Z",
+};
+
+describe("DataApiRestClient", () => {
+    describe("query", () => {
+        it("should fetch measures with query params", async () => {
+            const fetcher = vi
+                .fn()
+                .mockResolvedValue(jsonResponse(stubQueryResponse));
+            const client = new DataApiRestClient(createConfig(fetcher));
+
+            const result = await client.query("from=2026-01-01&to=2026-01-02");
+
+            expect(result).toEqual(stubQueryResponse);
+            expect(fetcher).toHaveBeenCalledOnce();
+
+            const [url, init] = fetcher.mock.calls[0] as [string, RequestInit];
+            expect(url).toBe(
+                "https://api.example.com/measures/query?from=2026-01-01&to=2026-01-02"
+            );
+            expect((init.headers as Record<string, string>).Authorization).toBe(
+                "Bearer test-token"
+            );
+        });
+
+        it("should throw ApiError on failure", async () => {
+            const fetcher = vi
+                .fn()
+                .mockResolvedValue(jsonResponse({ message: "Bad" }, 400));
+            const client = new DataApiRestClient(createConfig(fetcher));
+
+            await expect(client.query("bad")).rejects.toThrow(ApiError);
+        });
+    });
+
+    describe("export", () => {
+        it("should fetch all envelopes", async () => {
+            const fetcher = vi
+                .fn()
+                .mockResolvedValue(jsonResponse([stubEnvelope]));
+            const client = new DataApiRestClient(createConfig(fetcher));
+
+            const result = await client.export("from=2026-01-01&to=2026-01-02");
+
+            expect(result).toEqual([stubEnvelope]);
+
+            const [url] = fetcher.mock.calls[0] as [string, RequestInit];
+            expect(url).toBe(
+                "https://api.example.com/measures/export?from=2026-01-01&to=2026-01-02"
+            );
+        });
+    });
+
+    describe("getAllSensors", () => {
+        it("should fetch sensors without filter", async () => {
+            const fetcher = vi
+                .fn()
+                .mockResolvedValue(jsonResponse([stubSensor]));
+            const client = new DataApiRestClient(createConfig(fetcher));
+
+            const result = await client.getAllSensors();
+
+            expect(result).toEqual([stubSensor]);
+
+            const [url] = fetcher.mock.calls[0] as [string, RequestInit];
+            expect(url).toBe("https://api.example.com/sensor");
+        });
+    });
+
+    describe("getGatewaySensors", () => {
+        it("should fetch sensors filtered by gatewayId", async () => {
+            const fetcher = vi
+                .fn()
+                .mockResolvedValue(jsonResponse([stubSensor]));
+            const client = new DataApiRestClient(createConfig(fetcher));
+
+            const result = await client.getGatewaySensors("gw-1");
+
+            expect(result).toEqual([stubSensor]);
+
+            const [url] = fetcher.mock.calls[0] as [string, RequestInit];
+            expect(url).toBe("https://api.example.com/sensor?gatewayId=gw-1");
+        });
+    });
+});
