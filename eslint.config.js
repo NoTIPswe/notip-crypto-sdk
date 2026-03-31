@@ -8,6 +8,8 @@ export default [
             "node_modules/**",
             "*.config.ts",
             "*.config.js",
+            "src/generated/**",
+            "scripts/**",
         ],
     },
     ...tseslint.configs.recommendedTypeChecked,

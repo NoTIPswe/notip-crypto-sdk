@@ -16,6 +16,7 @@
     ],
     "sideEffects": false,
     "scripts": {
+        "fetch-dtos": "node ./scripts/update-openapi.js",
         "build": "tsup",
         "test": "vitest run",
         "test:coverage": "vitest run --coverage",
@@ -30,6 +31,7 @@
         "prepublishOnly": "npm run check && npm run test && npm run build"
     },
     "devDependencies": {
+        "@hey-api/openapi-ts": "^0.94.5",
         "@semantic-release/changelog": "^6.0.3",
         "@semantic-release/git": "^10.0.1",
         "@vitest/coverage-v8": "^4.0.0",
@@ -42,5 +44,8 @@
         "typescript-eslint": "^8.0.0",
         "vitest": "^4.0.0",
         "vitest-sonar-reporter": "^3.0.0"
+    },
+    "dependencies": {
+        "zod": "^4.3.6"
     }
 }

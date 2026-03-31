@@ -1,0 +1,422 @@
+openapi: 3.0.0
+paths:
+  /:
+    get:
+      operationId: AppController_getHello
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+        - App
+  /measures/query:
+    get:
+      description: >-
+        Returns a single paginated page of encrypted measures in the requested
+        time window.
+      operationId: MeasureController_query
+      parameters:
+        - name: from
+          required: true
+          in: query
+          description: Inclusive start timestamp in ISO 8601 format
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          required: true
+          in: query
+          description: Inclusive end timestamp in ISO 8601 format
+          schema:
+            type: string
+            format: date-time
+        - name: limit
+          required: false
+          in: query
+          description: Page size. Defaults to 1000 and cannot exceed 1000.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 1000
+        - name: cursor
+          required: false
+          in: query
+          description: Opaque cursor returned by a previous query page
+          schema:
+            type: string
+        - name: gatewayId
+          required: false
+          in: query
+          description: >-
+            Repeat the parameter to filter by multiple gateways, for example
+            ?gatewayId=gw-1&gatewayId=gw-2
+          schema:
+            example:
+              - gw-1
+              - gw-2
+            type: array
+            items:
+              type: string
+        - name: sensorId
+          required: false
+          in: query
+          description: >-
+            Repeat the parameter to filter by multiple sensors, for example
+            ?sensorId=sensor-1&sensorId=sensor-2
+          schema:
+            example:
+              - sensor-1
+              - sensor-2
+            type: array
+            items:
+              type: string
+        - name: sensorType
+          required: false
+          in: query
+          description: >-
+            Repeat the parameter to filter by multiple sensor types, for example
+            ?sensorType=temperature&sensorType=humidity
+          schema:
+            example:
+              - temperature
+              - humidity
+            type: array
+            items:
+              type: string
+      responses:
+        '200':
+          description: Paginated measure page
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/QueryResponseDto'
+        '400':
+          description: Invalid query parameters or time window too large
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+        '401':
+          description: Authentication failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+        '403':
+          description: Access to measures is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+      summary: Query measures with pagination
+      tags:
+        - measures
+  /measures/stream:
+    get:
+      description: >-
+        Streams matching encrypted measures as server-sent events using the
+        text/event-stream media type.
+      operationId: MeasureController_stream
+      parameters:
+        - name: gatewayId
+          required: false
+          in: query
+          description: >-
+            Repeat the parameter to filter the stream by multiple gateways, for
+            example ?gatewayId=gw-1&gatewayId=gw-2
+          schema:
+            example:
+              - gw-1
+              - gw-2
+            type: array
+            items:
+              type: string
+        - name: sensorId
+          required: false
+          in: query
+          description: Repeat the parameter to filter the stream by multiple sensors
+          schema:
+            example:
+              - sensor-1
+              - sensor-2
+            type: array
+            items:
+              type: string
+        - name: sensorType
+          required: false
+          in: query
+          description: Repeat the parameter to filter the stream by multiple sensor types
+          schema:
+            example:
+              - temperature
+              - humidity
+            type: array
+            items:
+              type: string
+      responses:
+        '200':
+          description: Server-sent event stream containing encrypted measures
+          content:
+            text/event-stream:
+              schema:
+                type: string
+              example: >+
+                data:
+                {"gatewayId":"gw-1","sensorId":"sensor-1","sensorType":"temperature","timestamp":"2026-03-23T09:58:00.000Z","encryptedData":"enc-3","iv":"iv-3","authTag":"tag-3","keyVersion":1}
+
+      summary: Open a live measure stream
+      tags:
+        - measures
+  /measures/export:
+    get:
+      description: >-
+        Returns all encrypted measures in the requested time window, up to the
+        export limits enforced by the service.
+      operationId: MeasureController_export
+      parameters:
+        - name: from
+          required: true
+          in: query
+          description: Inclusive start timestamp in ISO 8601 format
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          required: true
+          in: query
+          description: Inclusive end timestamp in ISO 8601 format
+          schema:
+            type: string
+            format: date-time
+        - name: gatewayId
+          required: false
+          in: query
+          description: >-
+            Repeat the parameter to filter by multiple gateways, for example
+            ?gatewayId=gw-1&gatewayId=gw-2
+          schema:
+            example:
+              - gw-1
+              - gw-2
+            type: array
+            items:
+              type: string
+        - name: sensorId
+          required: false
+          in: query
+          description: >-
+            Repeat the parameter to filter by multiple sensors, for example
+            ?sensorId=sensor-1&sensorId=sensor-2
+          schema:
+            example:
+              - sensor-1
+              - sensor-2
+            type: array
+            items:
+              type: string
+        - name: sensorType
+          required: false
+          in: query
+          description: >-
+            Repeat the parameter to filter by multiple sensor types, for example
+            ?sensorType=temperature&sensorType=humidity
+          schema:
+            example:
+              - temperature
+              - humidity
+            type: array
+            items:
+              type: string
+      responses:
+        '200':
+          description: Full list of matching encrypted measures
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EncryptedEnvelopeDto'
+        '400':
+          description: Invalid export parameters or time window too large
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+        '401':
+          description: Authentication failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+        '403':
+          description: Access to measures is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+      summary: Export measures without pagination
+      tags:
+        - measures
+  /sensor:
+    get:
+      description: >-
+        Returns unique sensors observed recently, optionally filtered by a
+        gateway identifier.
+      operationId: SensorController_getSensors
+      parameters:
+        - name: gatewayId
+          required: false
+          in: query
+          description: Gateway identifier used to restrict the sensor list
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Unique sensors with their latest observation timestamp
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SensorDto'
+        '401':
+          description: Authentication failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+        '403':
+          description: Access to sensors is forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+        '404':
+          description: Gateway or resource not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+      summary: List sensors seen in the last ten minutes
+      tags:
+        - sensor
+info:
+  title: NoTIP Data API
+  description: NoTIP Data API OpenAPI specification
+  version: 1.0.0
+  contact: {}
+tags: []
+servers: []
+components:
+  schemas:
+    EncryptedEnvelopeDto:
+      type: object
+      properties:
+        gatewayId:
+          type: string
+          description: Gateway identifier that produced the measure
+          example: gw-1
+        sensorId:
+          type: string
+          description: Sensor identifier inside the gateway
+          example: sensor-1
+        sensorType:
+          type: string
+          description: Sensor type
+          example: temperature
+        timestamp:
+          type: string
+          description: Time when the encrypted measure was recorded
+          example: '2026-03-23T09:58:00.000Z'
+          format: date-time
+        encryptedData:
+          type: string
+          description: Encrypted payload
+          example: enc-3
+        iv:
+          type: string
+          description: Initialization vector used for encryption
+          example: iv-3
+        authTag:
+          type: string
+          description: Authentication tag used for encryption
+          example: tag-3
+        keyVersion:
+          type: number
+          description: Encryption key version
+          example: 1
+      required:
+        - gatewayId
+        - sensorId
+        - sensorType
+        - timestamp
+        - encryptedData
+        - iv
+        - authTag
+        - keyVersion
+    QueryResponseDto:
+      type: object
+      properties:
+        data:
+          description: Page of encrypted measures
+          type: array
+          items:
+            $ref: '#/components/schemas/EncryptedEnvelopeDto'
+        nextCursor:
+          type: string
+          description: Cursor to request the next page, if available
+          example: '2026-03-23T09:58:00.000Z'
+        hasMore:
+          type: boolean
+          description: Whether more pages are available
+          example: true
+      required:
+        - data
+        - hasMore
+    ErrorResponseDto:
+      type: object
+      properties:
+        statusCode:
+          type: number
+          description: HTTP status code when Nest maps the error directly
+          example: 400
+        code:
+          type: string
+          description: Application-level error code, when provided by the service
+          example: QUERY_LIMIT_EXCEEDED
+        message:
+          type: string
+          description: Human-readable error message
+          example: limit must be less than or equal to 1000
+        error:
+          type: string
+          description: Short HTTP error label when returned by Nest
+          example: Bad Request
+    SensorDto:
+      type: object
+      properties:
+        sensorId:
+          type: string
+          description: Sensor identifier
+          example: sensor-1
+        sensorType:
+          type: string
+          description: Sensor type
+          example: temperature
+        gatewayId:
+          type: string
+          description: Gateway identifier
+          example: gw-1
+        lastSeen:
+          type: string
+          description: Timestamp of the latest measure seen for the sensor
+          example: '2026-03-23T09:58:00.000Z'
+          format: date-time
+      required:
+        - sensorId
+        - sensorType
+        - gatewayId
+        - lastSeen

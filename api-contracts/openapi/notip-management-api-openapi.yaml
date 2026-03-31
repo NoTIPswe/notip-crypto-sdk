@@ -1,0 +1,1156 @@
+openapi: 3.0.0
+paths:
+  /:
+    get:
+      operationId: AppController_getHello
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+        - App
+  /admin/gateways:
+    get:
+      operationId: GatewaysController_getAdminGateways
+      parameters:
+        - name: tenant_id
+          required: false
+          in: query
+          schema:
+            type: string
+      responses:
+        '403':
+          description: Forbidden
+      summary: Get all Gateways
+      tags:
+        - Admin Gateways
+    post:
+      operationId: GatewaysController_addGateway
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddGatewayRequestDto'
+      responses:
+        '404':
+          description: Tenant not found
+        '409':
+          description: Factory_id already registered
+      summary: Add Gateway to a Tenant
+      tags:
+        - Admin Gateways
+  /admin/tenants:
+    get:
+      operationId: TenantsController_getTenants
+      parameters: []
+      responses:
+        '200':
+          description: List of tenants
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TenantsResponseDto'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      summary: Get all tenants
+      tags:
+        - Admin Tenants
+    post:
+      operationId: TenantsController_createTenant
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTenantRequestDto'
+      responses:
+        '201':
+          description: Tenant created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantsResponseDto'
+        '400':
+          description: Bad Request
+        '409':
+          description: Conflict - Tenant with the same name already exists
+      summary: Create a new tenant
+      tags:
+        - Admin Tenants
+  /admin/tenants/{id}/users:
+    get:
+      operationId: TenantsController_getTenantUsers
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  properties:
+                    user_id:
+                      type: string
+                    role:
+                      type: string
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      summary: Get all users of a tenant
+      tags:
+        - Admin Tenants
+  /admin/tenants/{id}:
+    patch:
+      operationId: TenantsController_updateTenant
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTenantRequestDto'
+      responses:
+        '200':
+          description: Tenant updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantsResponseDto'
+        '400':
+          description: Bad Request
+        '404':
+          description: Tenant not found
+      summary: Update tenant details
+      tags:
+        - Admin Tenants
+    delete:
+      operationId: TenantsController_deleteTenant
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Tenant deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteTenantResponseDto'
+        '404':
+          description: Tenant not found
+      summary: Delete a tenant
+      tags:
+        - Admin Tenants
+  /alerts:
+    get:
+      operationId: AlertsController_getAlerts
+      parameters:
+        - name: from
+          required: false
+          in: query
+          schema:
+            type: string
+        - name: to
+          required: false
+          in: query
+          schema:
+            type: string
+        - name: gateway_id
+          required: false
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+      summary: Get alerts for the tenant in a time range
+      tags:
+        - Alerts
+  /alerts/config:
+    get:
+      operationId: AlertsController_getAlertsConfig
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      summary: Get alert configuration for the tenant
+      tags:
+        - Alerts
+  /alerts/config/default:
+    put:
+      operationId: AlertsController_setDefaultAlertsConfig
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetAlertsConfigDefaultRequestDto'
+      responses:
+        '200':
+          description: ''
+      summary: Set default alert configuration for the tenant
+      tags:
+        - Alerts
+  /alerts/config/gateway/{gatewayId}:
+    put:
+      operationId: AlertsController_setGatewayAlertsConfig
+      parameters:
+        - name: gatewayId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetGatewayAlertsConfigRequestDto'
+      responses:
+        '200':
+          description: Alert configuration updated successfully
+        '400':
+          description: Bad Request
+        '403':
+          description: Gateway not associated with tenant of JWT
+        '404':
+          description: Gateway not found
+      summary: Set alert configuration for a specific gateway
+      tags:
+        - Alerts
+    delete:
+      operationId: AlertsController_deleteGatewayAlertsConfig
+      parameters:
+        - name: gatewayId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Alert configuration deleted successfully
+        '403':
+          description: Gateway not associated with tenant of JWT
+        '404':
+          description: Gateway not found
+      summary: Delete alert configuration for a specific gateway
+      tags:
+        - Alerts
+  /api-clients:
+    post:
+      operationId: ApiClientController_createApiClient
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateApiClientRequestDto'
+      responses:
+        '400':
+          description: Bad Request
+        '409':
+          description: API client with the same name already exists
+      summary: Create a new API client for the tenant
+      tags:
+        - ApiClient
+    get:
+      operationId: ApiClientController_getApiClients
+      parameters: []
+      responses:
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      summary: Get all API clients for the tenant
+      tags:
+        - ApiClient
+  /api-clients/{id}:
+    delete:
+      operationId: ApiClientController_deleteApiClient
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '404':
+          description: API client not found
+      summary: Delete an API client for the tenant
+      tags:
+        - ApiClient
+  /audit:
+    get:
+      operationId: AuditLogController_getAuditLogs
+      parameters:
+        - name: from
+          required: true
+          in: query
+          schema:
+            format: date-time
+            type: string
+        - name: to
+          required: true
+          in: query
+          schema:
+            format: date-time
+            type: string
+        - name: userId
+          required: true
+          in: query
+          schema:
+            type: string
+        - name: action
+          required: true
+          in: query
+          schema:
+            type: string
+      responses:
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Audit logs not found
+      summary: Get audit logs for the tenant
+      tags:
+        - AuditLog
+  /auth/me:
+    get:
+      operationId: AuthController_getMe
+      parameters: []
+      responses:
+        '200':
+          description: Authenticated user details
+        '401':
+          description: Unauthorized
+      summary: Return authenticated user claims mapped by JwtStrategy
+      tags:
+        - auth
+  /auth/impersonate:
+    post:
+      operationId: AuthController_impersonate
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                user_id:
+                  type: string
+      responses:
+        '200':
+          description: Impersonation token
+          content:
+            application/json:
+              schema:
+                properties:
+                  access_token:
+                    type: string
+                  expires_in:
+                    type: number
+      summary: Impersonate a tenant user (admin only)
+      tags:
+        - auth
+  /cmd/{gatewayId}/config:
+    post:
+      operationId: CommandController_sendConfig
+      parameters:
+        - name: gatewayId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendConfigRequestDto'
+      responses:
+        '202':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommandResponseDto'
+      summary: Send configuration to a gateway
+      tags:
+        - Commands
+  /cmd/{gatewayId}/firmware:
+    post:
+      operationId: CommandController_sendFirmware
+      parameters:
+        - name: gatewayId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendFirmwareRequestDto'
+      responses:
+        '202':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommandResponseDto'
+      summary: Send firmware update to a gateway
+      tags:
+        - Commands
+  /cmd/{gatewayId}/status/{commandId}:
+    get:
+      operationId: CommandController_getStatus
+      parameters:
+        - name: gatewayId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: commandId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommandStatusResponseDto'
+      summary: Get command execution status
+      tags:
+        - Commands
+  /costs:
+    get:
+      operationId: CostsController_getTenantCost
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CostResponseDto'
+      summary: Get current costs for the tenant
+      tags:
+        - Costs
+  /gateways:
+    get:
+      operationId: GatewaysController_getGateways
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GatewayResponseDto'
+      summary: Get all gateways for the tenant
+      tags:
+        - Gateways
+  /gateways/{id}:
+    get:
+      operationId: GatewaysController_getGatewayById
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GatewayResponseDto'
+      summary: Get gateway by id
+      tags:
+        - Gateways
+    patch:
+      operationId: GatewaysController_updateGateway
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateGatewayRequestDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateGatewayResponseDto'
+      summary: Update gateway details
+      tags:
+        - Gateways
+    delete:
+      operationId: GatewaysController_deleteGateway
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Gateway deleted
+      summary: Delete a gateway
+      tags:
+        - Gateways
+  /keys:
+    get:
+      operationId: KeysController_getKeys
+      parameters:
+        - name: id
+          required: true
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of keys
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/KeysResponseDto'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Gateway not found
+      summary: Get all keys for a gateway
+      tags:
+        - Keys
+  /thresholds:
+    get:
+      operationId: ThresholdsController_getThresholds
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+        - Thresholds
+  /thresholds/default:
+    put:
+      operationId: ThresholdsController_setDefaultThreshold
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetThresholdDefaultTypeRequestDto'
+      responses:
+        '200':
+          description: ''
+      tags:
+        - Thresholds
+  /thresholds/sensor/{sensorId}:
+    put:
+      operationId: ThresholdsController_setSensorThreshold
+      parameters:
+        - name: sensorId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetThresholdSensorRequestDto'
+      responses:
+        '200':
+          description: ''
+      tags:
+        - Thresholds
+    delete:
+      operationId: ThresholdsController_deleteSensorThreshold
+      parameters:
+        - name: sensorId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+      tags:
+        - Thresholds
+  /thresholds/type/{sensorType}:
+    delete:
+      operationId: ThresholdsController_deleteThresholdType
+      parameters:
+        - name: sensorType
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+      tags:
+        - Thresholds
+  /users/{id}:
+    get:
+      operationId: UsersController_getUserById
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponseDto'
+      summary: Get user details by id
+      tags:
+        - Users
+    patch:
+      operationId: UsersController_updateUser
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequestDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateUserResponseDto'
+      summary: Update user in tenant
+      tags:
+        - Users
+  /users:
+    get:
+      operationId: UsersController_getUsers
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserResponseDto'
+      summary: Get users for tenant
+      tags:
+        - Users
+    post:
+      operationId: UsersController_createUser
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequestDto'
+      responses:
+        '201':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateUserResponseDto'
+      summary: Create user in tenant
+      tags:
+        - Users
+  /users/bulk-delete:
+    post:
+      operationId: UsersController_deleteUsers
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteUserRequestDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteUserResponseDto'
+      summary: Delete users by ids
+      tags:
+        - Users
+info:
+  title: NoTIP Management API
+  description: NoTIP Management API OpenAPI specification
+  version: 1.2.0
+  contact: {}
+tags: []
+servers: []
+components:
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: JWT
+      type: http
+  schemas:
+    AddGatewayRequestDto:
+      type: object
+      properties:
+        factory_id:
+          type: string
+        tenant_id:
+          type: string
+        factory_key_hash:
+          type: string
+      required:
+        - factory_id
+        - tenant_id
+        - factory_key_hash
+    TenantsResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        status:
+          type: string
+          enum:
+            - active
+            - suspended
+        created_at:
+          format: date-time
+          type: string
+      required:
+        - id
+        - name
+        - status
+        - created_at
+    CreateTenantRequestDto:
+      type: object
+      properties:
+        name:
+          type: string
+        admin_email:
+          type: string
+        admin_name:
+          type: string
+        admin_password:
+          type: string
+          example: Temp_1234_A!
+      required:
+        - name
+        - admin_email
+        - admin_name
+        - admin_password
+    UpdateTenantRequestDto:
+      type: object
+      properties:
+        name:
+          type: string
+        status:
+          type: string
+          enum:
+            - active
+            - suspended
+        suspension_interval_days:
+          type: number
+      required:
+        - name
+        - status
+        - suspension_interval_days
+    DeleteTenantResponseDto:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
+    SetAlertsConfigDefaultRequestDto:
+      type: object
+      properties:
+        tenant_unreachable_timeout_ms:
+          type: number
+      required:
+        - tenant_unreachable_timeout_ms
+    SetGatewayAlertsConfigRequestDto:
+      type: object
+      properties:
+        gateway_unreachable_timeout_ms:
+          type: number
+      required:
+        - gateway_unreachable_timeout_ms
+    CreateApiClientRequestDto:
+      type: object
+      properties: {}
+    SendConfigRequestDto:
+      type: object
+      properties:
+        send_frequency_ms:
+          type: number
+        status:
+          type: string
+    CommandResponseDto:
+      type: object
+      properties:
+        command_id:
+          type: string
+        status:
+          type: string
+          enum:
+            - queued
+            - ack
+            - nack
+            - expired
+            - timeout
+        issued_at:
+          type: string
+          format: date-time
+      required:
+        - command_id
+        - status
+        - issued_at
+    SendFirmwareRequestDto:
+      type: object
+      properties:
+        firmware_version:
+          type: string
+        download_url:
+          type: string
+      required:
+        - firmware_version
+        - download_url
+    CommandStatusResponseDto:
+      type: object
+      properties:
+        command_id:
+          type: string
+        status:
+          type: string
+          enum:
+            - queued
+            - ack
+            - nack
+            - expired
+            - timeout
+        timestamp:
+          type: string
+          format: date-time
+      required:
+        - command_id
+        - status
+        - timestamp
+    CostResponseDto:
+      type: object
+      properties:
+        storage_gb:
+          type: number
+        bandwidth_gb:
+          type: number
+      required:
+        - storage_gb
+        - bandwidth_gb
+    GatewayResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier of the gateway
+          example: 550e8400-e29b-41d4-a716-446655440000
+        name:
+          type: string
+          description: User-defined name of the gateway
+          example: Main Entrance Gateway
+        status:
+          type: string
+          description: Current connectivity status
+          enum:
+            - gateway_online
+            - gateway_offline
+            - gateway_suspended
+          example: gateway_online
+        last_seen_at:
+          type: string
+          description: Timestamp of the last heart-beat received from the gateway
+          example: '2024-03-24T10:00:00Z'
+          format: date-time
+        provisioned:
+          type: boolean
+          description: Whether the gateway has been provisioned/activated
+          example: true
+        firmware_version:
+          type: string
+          description: Current firmware version installed on the device
+          example: 1.2.3
+        send_frequency_ms:
+          type: number
+          description: Configured data sending frequency in milliseconds
+          example: 30000
+      required:
+        - id
+        - name
+        - status
+        - last_seen_at
+        - provisioned
+        - firmware_version
+        - send_frequency_ms
+    UpdateGatewayRequestDto:
+      type: object
+      properties:
+        name:
+          type: string
+      required:
+        - name
+    UpdateGatewayResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        status:
+          type: string
+          enum:
+            - gateway_online
+            - gateway_offline
+            - gateway_suspended
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - status
+        - updated_at
+    KeysResponseDto:
+      type: object
+      properties:
+        gateway_id:
+          type: string
+        key_material:
+          type: string
+          format: byte
+        key_version:
+          type: number
+      required:
+        - gateway_id
+        - key_material
+        - key_version
+    SetThresholdDefaultTypeRequestDto:
+      type: object
+      properties:
+        sensor_type:
+          type: string
+        min_value:
+          type: number
+        max_value:
+          type: number
+      required:
+        - sensor_type
+        - min_value
+        - max_value
+    SetThresholdSensorRequestDto:
+      type: object
+      properties:
+        min_value:
+          type: number
+        max_value:
+          type: number
+        sensor_type:
+          type: string
+      required:
+        - min_value
+        - max_value
+        - sensor_type
+    UserResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum:
+            - system_admin
+            - tenant_admin
+            - tenant_user
+        last_access:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+        - id
+        - name
+        - email
+        - role
+        - last_access
+    CreateUserRequestDto:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum:
+            - system_admin
+            - tenant_admin
+            - tenant_user
+        password:
+          type: string
+      required:
+        - name
+        - email
+        - role
+        - password
+    CreateUserResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum:
+            - system_admin
+            - tenant_admin
+            - tenant_user
+        created_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - email
+        - role
+        - created_at
+    UpdateUserRequestDto:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum:
+            - system_admin
+            - tenant_admin
+            - tenant_user
+        permissions:
+          type: array
+          items:
+            type: string
+      required:
+        - name
+        - email
+        - role
+        - permissions
+    UpdateUserResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum:
+            - system_admin
+            - tenant_admin
+            - tenant_user
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - email
+        - role
+        - updated_at
+    DeleteUserRequestDto:
+      type: object
+      properties:
+        ids:
+          type: array
+          items:
+            type: string
+      required:
+        - ids
+    DeleteUserResponseDto:
+      type: object
+      properties:
+        deleted:
+          type: number
+        failed:
+          type: array
+          items:
+            type: string
+      required:
+        - deleted
+        - failed
