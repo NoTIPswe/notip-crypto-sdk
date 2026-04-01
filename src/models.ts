@@ -64,6 +64,14 @@ export const zPlaintextMeasure = z.object({
 
 export type PlaintextMeasure = z.infer<typeof zPlaintextMeasure>;
 
+export const zQueryResponsePage = z.object({
+    data: z.array(zPlaintextMeasure),
+    nextCursor: z.string().optional(),
+    hasMore: z.boolean(),
+});
+
+export type QueryResponsePage = z.infer<typeof zQueryResponsePage>;
+
 export interface KeyModel {
     gatewayId: string;
     keyVersion: number;

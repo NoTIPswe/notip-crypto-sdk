@@ -62,10 +62,19 @@ function createChannel<T>(): {
 export class DataApiSseClient {
     constructor(private readonly config: Config) {}
 
-    async *stream(params: string): AsyncGenerator<EncryptedEnvelopeDTO> {
+    async *stream(
+        params: string,
+        signal?: AbortSignal
+    ): AsyncGenerator<EncryptedEnvelopeDTO> {
         const token = await this.config.tokenProvider();
         const channel = createChannel<EncryptedEnvelopeDTO>();
         const abortController = new AbortController();
+
+        signal?.addEventListener(
+            "abort",
+            () => abortController.abort(signal.reason),
+            { once: true }
+        );
 
         const fetchPromise = fetchEventSource(
             `${this.config.baseUrl}/measures/stream?${params}`,

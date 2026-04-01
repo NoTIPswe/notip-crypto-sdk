@@ -3,6 +3,7 @@ export { DataApiService } from "./data-api.service.js";
 
 export type {
     PlaintextMeasure,
+    QueryResponsePage,
     SensorData,
     KeyModel,
     QueryModel,

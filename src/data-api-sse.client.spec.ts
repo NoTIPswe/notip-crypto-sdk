@@ -147,4 +147,36 @@ describe("DataApiSseClient", () => {
             }
         }).rejects.toThrow(ValidationError);
     });
+
+    it("should abort the internal fetch signal when the external signal fires", async () => {
+        let capturedSignal: AbortSignal | undefined;
+
+        mockedFetchEventSource.mockImplementation((_url, opts) => {
+            capturedSignal = (opts as { signal?: AbortSignal }).signal;
+            opts?.onmessage?.({
+                data: JSON.stringify(stubEnvelope),
+                id: "1",
+                event: "",
+            });
+            // Resolve when aborted to unblock the finally block
+            return new Promise<void>((resolve) => {
+                capturedSignal?.addEventListener("abort", () => resolve(), {
+                    once: true,
+                });
+            });
+        });
+
+        const client = new DataApiSseClient(createConfig());
+        const controller = new AbortController();
+        const gen = client.stream("gatewayId=gw-1", controller.signal);
+
+        await gen.next(); // advance past first message
+
+        expect(capturedSignal?.aborted).toBe(false);
+        controller.abort("test-reason");
+        expect(capturedSignal?.aborted).toBe(true);
+        expect(capturedSignal?.reason).toBe("test-reason");
+
+        await gen.return(undefined);
+    });
 });
