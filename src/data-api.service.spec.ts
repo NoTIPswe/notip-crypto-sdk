@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeAll } from "vitest";
 
 import type { Config } from "./config.js";
 import { DataApiService } from "./data-api.service.js";
+import { DataApiSseClient } from "./data-api-sse.client.js";
 import { ValidationError } from "./errors.js";
 import type { EncryptedEnvelopeDTO } from "./models.js";
 
@@ -309,6 +310,25 @@ describe("DataApiService", () => {
                 throw new Error("Expected a streamed measure");
             }
             expect(first.value).toBe(23.5);
+        });
+
+        it("should forward the AbortSignal to the SSE client", async () => {
+            const streamSpy = vi
+                .spyOn(DataApiSseClient.prototype, "stream")
+                .mockImplementation(async function* () {});
+
+            const config = createConfig({});
+            const service = new DataApiService(config);
+            const controller = new AbortController();
+
+            await service.streamMeasures({}, controller.signal).next();
+
+            expect(streamSpy).toHaveBeenCalledWith(
+                expect.any(String),
+                controller.signal
+            );
+
+            streamSpy.mockRestore();
         });
     });
 });

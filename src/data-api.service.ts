@@ -53,12 +53,38 @@ export class DataApiService {
         return results;
     }
 
+    /**
+     * Streams decrypted measures from the SSE endpoint.
+     *
+     * **Lifecycle responsibility:** The SSE connection is held open for the
+     * lifetime of the generator. To release it you must either:
+     * - Break out of (or fully exhaust) the `for await...of` loop, or
+     * - Pass an `AbortSignal` and call `controller.abort()` from outside the loop.
+     *
+     * Abandoning the generator without doing either will leak the connection.
+     *
+     * @example
+     * // Idiomatic usage — break closes the connection automatically
+     * for await (const measure of service.streamMeasures(query)) {
+     *   process(measure);
+     *   if (done) break;
+     * }
+     *
+     * @example
+     * // External cancellation via AbortController
+     * const controller = new AbortController();
+     * setTimeout(() => controller.abort(), 30_000);
+     * for await (const measure of service.streamMeasures(query, controller.signal)) {
+     *   process(measure);
+     * }
+     */
     async *streamMeasures(
-        query: StreamModel
+        query: StreamModel,
+        signal?: AbortSignal
     ): AsyncGenerator<PlaintextMeasure> {
         const params = toSearchParams(query);
 
-        for await (const envelope of this.sseClient.stream(params)) {
+        for await (const envelope of this.sseClient.stream(params, signal)) {
             yield this.decryptEnvelope(envelope);
         }
     }
