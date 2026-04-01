@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/NoTIPswe/notip-crypto-sdk/compare/v1.1.0...v1.1.1) (2026-04-01)
+
+
+### Bug Fixes
+
+* update API endpoints to include 'data' and 'mgmt' prefixes ([c8f9e0a](https://github.com/NoTIPswe/notip-crypto-sdk/commit/c8f9e0a69417a535beb6b80e440c3911bf28cc60))
+
 # [1.1.0](https://github.com/NoTIPswe/notip-crypto-sdk/compare/v1.0.0...v1.1.0) (2026-04-01)
 
 
