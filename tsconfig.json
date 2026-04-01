@@ -15,7 +15,8 @@
         "declaration": true,
         "declarationMap": true,
 
-        "lib": ["ES2022"],
+        // WebWorker APIs are cross-platform (browsers and Node.js), and include useful features like `fetch`
+        "lib": ["ES2022", "WebWorker"],
 
         "isolatedModules": true,
         "skipLibCheck": true

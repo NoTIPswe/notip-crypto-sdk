@@ -17,7 +17,6 @@ const options = {
 const { values } = parseArgs({
     options,
     args: process.argv.slice(2),
-    strict: false, // allows arbitrary additional flags if needed
 });
 
 if (!values.repo || !values.tag) {
@@ -71,11 +70,11 @@ try {
     const generateCmd = `npx @hey-api/openapi-ts -i "${localFilePath}" -o "${tmpDir}" -p zod -s`;
     execSync(generateCmd, { stdio: "inherit" });
     renameSync(join(tmpDir, "zod.gen.ts"), outFilePath);
-    rmSync(tmpDir, { recursive: true });
 } catch (error) {
     console.error("Error: Failed to generate Zod schemas.");
-    rmSync(tmpDir, { recursive: true, force: true });
     process.exit(1);
+} finally {
+    rmSync(tmpDir, { recursive: true, force: true });
 }
 
 // 7. Format the output
