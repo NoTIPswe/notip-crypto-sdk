@@ -13,7 +13,7 @@ export class DataApiRestClient {
     async query(params: string): Promise<QueryResponseDTO> {
         const response = await authorizedFetch(
             this.config,
-            `/measures/query?${params}`
+            `/data/measures/query?${params}`
         );
         const raw: unknown = await response.json();
         const validated = zQueryResponseDto.safeParse(raw);
@@ -28,7 +28,7 @@ export class DataApiRestClient {
     async export(params: string): Promise<EncryptedEnvelopeDTO[]> {
         const response = await authorizedFetch(
             this.config,
-            `/measures/export?${params}`
+            `/data/measures/export?${params}`
         );
         const raw: unknown = await response.json();
         const validated = zMeasureControllerExportResponse.safeParse(raw);

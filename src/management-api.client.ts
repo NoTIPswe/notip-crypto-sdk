@@ -8,7 +8,7 @@ export class ManagementApiClient {
     constructor(private readonly config: Config) {}
 
     async getAllKeys(): Promise<KeyDTO[]> {
-        const response = await authorizedFetch(this.config, "/keys");
+        const response = await authorizedFetch(this.config, "/mgmt/keys");
         const raw: unknown = await response.json();
         const validated = zKeysControllerGetKeysResponse.safeParse(raw);
         if (!validated.success) {
@@ -22,7 +22,7 @@ export class ManagementApiClient {
     async getGatewayKey(gatewayId: string, version: number): Promise<KeyDTO> {
         const response = await authorizedFetch(
             this.config,
-            `/keys?id=${encodeURIComponent(gatewayId)}`
+            `/mgmt/keys?id=${encodeURIComponent(gatewayId)}`
         );
         const raw: unknown = await response.json();
         const validated = zKeysControllerGetKeysResponse.safeParse(raw);

@@ -51,7 +51,7 @@ describe("DataApiRestClient", () => {
 
             const [url, init] = fetcher.mock.calls[0] as [string, RequestInit];
             expect(url).toBe(
-                "https://api.example.com/measures/query?from=2026-01-01&to=2026-01-02"
+                "https://api.example.com/data/measures/query?from=2026-01-01&to=2026-01-02"
             );
             expect((init.headers as Record<string, string>).Authorization).toBe(
                 "Bearer test-token"
@@ -92,7 +92,7 @@ describe("DataApiRestClient", () => {
 
             const [url] = fetcher.mock.calls[0] as [string, RequestInit];
             expect(url).toBe(
-                "https://api.example.com/measures/export?from=2026-01-01&to=2026-01-02"
+                "https://api.example.com/data/measures/export?from=2026-01-01&to=2026-01-02"
             );
         });
 

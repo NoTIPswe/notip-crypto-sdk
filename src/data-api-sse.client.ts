@@ -77,7 +77,7 @@ export class DataApiSseClient {
         );
 
         const fetchPromise = fetchEventSource(
-            `${this.config.baseUrl}/measures/stream?${params}`,
+            `${this.config.baseUrl}/data/measures/stream?${params}`,
             {
                 headers: { Authorization: `Bearer ${token}` },
                 signal: abortController.signal,

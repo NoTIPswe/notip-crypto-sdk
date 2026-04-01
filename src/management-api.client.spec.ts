@@ -37,7 +37,7 @@ describe("ManagementApiClient", () => {
             expect(fetcher).toHaveBeenCalledOnce();
 
             const [url, init] = fetcher.mock.calls[0] as [string, RequestInit];
-            expect(url).toBe("https://api.example.com/keys");
+            expect(url).toBe("https://api.example.com/mgmt/keys");
             expect((init.headers as Record<string, string>).Authorization).toBe(
                 "Bearer test-token"
             );
@@ -77,7 +77,7 @@ describe("ManagementApiClient", () => {
             expect(result).toEqual(stubKeys[1]);
 
             const [url] = fetcher.mock.calls[0] as [string, RequestInit];
-            expect(url).toBe("https://api.example.com/keys?id=gw-1");
+            expect(url).toBe("https://api.example.com/mgmt/keys?id=gw-1");
         });
 
         it("should throw SdkError when version not found", async () => {
