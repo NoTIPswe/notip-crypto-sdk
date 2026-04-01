@@ -10,6 +10,7 @@ import type {
     ExportModel,
     PlaintextMeasure,
     QueryModel,
+    QueryResponsePage,
     StreamModel,
 } from "./models.js";
 import { zSensorData } from "./models.js";
@@ -42,15 +43,19 @@ export class DataApiService {
         this.cryptoEngine = new CryptoEngine();
     }
 
-    async queryMeasures(query: QueryModel): Promise<PlaintextMeasure[]> {
+    async queryMeasures(query: QueryModel): Promise<QueryResponsePage> {
         const params = toSearchParams(query);
         const response = await this.restClient.query(params);
 
-        const results: PlaintextMeasure[] = [];
+        const data: PlaintextMeasure[] = [];
         for (const envelope of response.data) {
-            results.push(await this.decryptEnvelope(envelope));
+            data.push(await this.decryptEnvelope(envelope));
         }
-        return results;
+        return {
+            data,
+            nextCursor: response.nextCursor,
+            hasMore: response.hasMore,
+        };
     }
 
     /**

@@ -184,7 +184,7 @@ describe("DataApiService integration", () => {
                 to: "2026-01-02T00:00:00Z",
             });
 
-            expect(results).toHaveLength(3);
+            expect(results.data).toHaveLength(3);
             expect(keyFetchCount).toBe(1);
         });
 
@@ -225,9 +225,9 @@ describe("DataApiService integration", () => {
                 to: "2026-01-02T00:00:00Z",
             });
 
-            expect(results).toHaveLength(2);
-            expect(results[0]?.value).toBe(23.5);
-            expect(results[1]?.value).toBe(23.5);
+            expect(results.data).toHaveLength(2);
+            expect(results.data[0]?.value).toBe(23.5);
+            expect(results.data[1]?.value).toBe(23.5);
             // Each version miss triggers a separate key fetch
             expect(keyFetchCount).toBe(2);
         });
@@ -275,7 +275,7 @@ describe("DataApiService integration", () => {
                 to: "2026-01-02T00:00:00Z",
             });
 
-            expect(results).toHaveLength(2);
+            expect(results.data).toHaveLength(2);
             expect(gw1FetchCount).toBe(1);
             expect(gw2FetchCount).toBe(1);
         });
@@ -325,6 +325,64 @@ describe("DataApiService integration", () => {
             });
 
             expect(capturedAuthHeader).toBe("Bearer async-token");
+        });
+    });
+
+    describe("queryMeasures", () => {
+        it("returns data with hasMore false and no nextCursor on a single page", async () => {
+            const envelope = await makeEnvelope(gw1v1.cryptoKey);
+            const config = createConfig({
+                "keys?id=gw-1": () => [
+                    {
+                        gateway_id: "gw-1",
+                        key_material: gw1v1.materialBase64,
+                        key_version: 1,
+                    },
+                ],
+                "/measures/query": () => ({
+                    data: [envelope],
+                    hasMore: false,
+                }),
+            });
+
+            const service = new DataApiService(config);
+            const result = await service.queryMeasures({
+                from: "2026-01-01T00:00:00Z",
+                to: "2026-01-02T00:00:00Z",
+            });
+
+            expect(result.data).toHaveLength(1);
+            expect(result.data[0]?.value).toBe(23.5);
+            expect(result.hasMore).toBe(false);
+            expect(result.nextCursor).toBeUndefined();
+        });
+
+        it("returns nextCursor and hasMore true when more pages are available", async () => {
+            const envelope = await makeEnvelope(gw1v1.cryptoKey);
+            const config = createConfig({
+                "keys?id=gw-1": () => [
+                    {
+                        gateway_id: "gw-1",
+                        key_material: gw1v1.materialBase64,
+                        key_version: 1,
+                    },
+                ],
+                "/measures/query": () => ({
+                    data: [envelope],
+                    hasMore: true,
+                    nextCursor: "page-token-xyz",
+                }),
+            });
+
+            const service = new DataApiService(config);
+            const result = await service.queryMeasures({
+                from: "2026-01-01T00:00:00Z",
+                to: "2026-01-02T00:00:00Z",
+                limit: 1,
+            });
+
+            expect(result.hasMore).toBe(true);
+            expect(result.nextCursor).toBe("page-token-xyz");
         });
     });
 

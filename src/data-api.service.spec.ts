@@ -170,8 +170,8 @@ describe("DataApiService", () => {
                 to: "2026-01-02T00:00:00Z",
             });
 
-            expect(result).toHaveLength(1);
-            expect(result[0]).toEqual({
+            expect(result.data).toHaveLength(1);
+            expect(result.data[0]).toEqual({
                 gatewayId: "gw-1",
                 sensorId: "sensor-1",
                 sensorType: "temperature",
@@ -179,6 +179,8 @@ describe("DataApiService", () => {
                 value: 23.5,
                 unit: "°C",
             });
+            expect(result.hasMore).toBe(false);
+            expect(result.nextCursor).toBeUndefined();
         });
 
         it("should propagate ValidationError on invalid query response", async () => {
@@ -195,6 +197,33 @@ describe("DataApiService", () => {
                     to: "2026-01-02T00:00:00Z",
                 })
             ).rejects.toThrow(ValidationError);
+        });
+
+        it("should expose nextCursor and hasMore when there are more pages", async () => {
+            const envelope = await makeEnvelope();
+            const config = createConfig({
+                "/measures/query": () => ({
+                    data: [envelope],
+                    hasMore: true,
+                    nextCursor: "cursor-abc",
+                }),
+                "/keys": () => [
+                    {
+                        gateway_id: "gw-1",
+                        key_material: testKeyMaterialBase64,
+                        key_version: 1,
+                    },
+                ],
+            });
+
+            const service = new DataApiService(config);
+            const result = await service.queryMeasures({
+                from: "2026-01-01T00:00:00Z",
+                to: "2026-01-02T00:00:00Z",
+            });
+
+            expect(result.hasMore).toBe(true);
+            expect(result.nextCursor).toBe("cursor-abc");
         });
 
         it("should throw ValidationError on invalid decrypted payload", async () => {
