@@ -84,7 +84,7 @@ describe("DataApiSseClient", () => {
             Record<string, unknown>,
         ];
         expect(url).toBe(
-            "https://api.example.com/measures/stream?sensorType=temperature"
+            "https://api.example.com/data/measures/stream?sensorType=temperature"
         );
         expect((opts.headers as Record<string, string>).Authorization).toBe(
             "Bearer test-token"
