@@ -10,7 +10,6 @@ import type {
     ExportModel,
     PlaintextMeasure,
     QueryModel,
-    SensorModel,
     StreamModel,
 } from "./models.js";
 import { zSensorData } from "./models.js";
@@ -73,28 +72,6 @@ export class DataApiService {
         for (const envelope of envelopes) {
             yield this.decryptEnvelope(envelope);
         }
-    }
-
-    async getSensors(): Promise<SensorModel[]> {
-        const sensors = await this.restClient.getAllSensors();
-
-        return sensors.map((dto) => ({
-            sensorId: dto.sensorId,
-            sensorType: dto.sensorType,
-            gatewayId: dto.gatewayId,
-            lastSeen: dto.lastSeen,
-        }));
-    }
-
-    async getGatewaySensors(gatewayId: string): Promise<SensorModel[]> {
-        const sensors = await this.restClient.getGatewaySensors(gatewayId);
-
-        return sensors.map((dto) => ({
-            sensorId: dto.sensorId,
-            sensorType: dto.sensorType,
-            gatewayId: dto.gatewayId,
-            lastSeen: dto.lastSeen,
-        }));
     }
 
     private async decryptEnvelope(

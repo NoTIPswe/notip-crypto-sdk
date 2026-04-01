@@ -3,11 +3,7 @@ import { describe, it, expect, vi } from "vitest";
 import type { Config } from "./config.js";
 import { DataApiRestClient } from "./data-api-rest.client.js";
 import { ApiError, ValidationError } from "./errors.js";
-import type {
-    EncryptedEnvelopeDTO,
-    QueryResponseDTO,
-    SensorDTO,
-} from "./models.js";
+import type { EncryptedEnvelopeDTO, QueryResponseDTO } from "./models.js";
 
 function createConfig(fetcher: Config["fetcher"]): Config {
     return {
@@ -38,13 +34,6 @@ const stubEnvelope: EncryptedEnvelopeDTO = {
 const stubQueryResponse: QueryResponseDTO = {
     data: [stubEnvelope],
     hasMore: false,
-};
-
-const stubSensor: SensorDTO = {
-    sensorId: "sensor-1",
-    sensorType: "temperature",
-    gatewayId: "gw-1",
-    lastSeen: "2026-03-23T09:58:00.000Z",
 };
 
 describe("DataApiRestClient", () => {
@@ -116,49 +105,6 @@ describe("DataApiRestClient", () => {
             await expect(client.export("from=a&to=b")).rejects.toThrow(
                 ValidationError
             );
-        });
-    });
-
-    describe("getAllSensors", () => {
-        it("should fetch sensors without filter", async () => {
-            const fetcher = vi
-                .fn()
-                .mockResolvedValue(jsonResponse([stubSensor]));
-            const client = new DataApiRestClient(createConfig(fetcher));
-
-            const result = await client.getAllSensors();
-
-            expect(result).toEqual([stubSensor]);
-
-            const [url] = fetcher.mock.calls[0] as [string, RequestInit];
-            expect(url).toBe("https://api.example.com/sensor");
-        });
-
-        it("should throw ValidationError for invalid sensor DTO", async () => {
-            const fetcher = vi
-                .fn()
-                .mockResolvedValue(jsonResponse([{ bad: "shape" }]));
-            const client = new DataApiRestClient(createConfig(fetcher));
-
-            await expect(client.getAllSensors()).rejects.toThrow(
-                ValidationError
-            );
-        });
-    });
-
-    describe("getGatewaySensors", () => {
-        it("should fetch sensors filtered by gatewayId", async () => {
-            const fetcher = vi
-                .fn()
-                .mockResolvedValue(jsonResponse([stubSensor]));
-            const client = new DataApiRestClient(createConfig(fetcher));
-
-            const result = await client.getGatewaySensors("gw-1");
-
-            expect(result).toEqual([stubSensor]);
-
-            const [url] = fetcher.mock.calls[0] as [string, RequestInit];
-            expect(url).toBe("https://api.example.com/sensor?gatewayId=gw-1");
         });
     });
 });

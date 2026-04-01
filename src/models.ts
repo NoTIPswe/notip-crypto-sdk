@@ -3,7 +3,6 @@ import { z } from "zod";
 import type {
     zEncryptedEnvelopeDto,
     zQueryResponseDto,
-    zSensorDto,
 } from "./generated/notip-data-api-openapi.js";
 import type { zKeysResponseDto } from "./generated/notip-management-api-openapi.js";
 
@@ -13,7 +12,6 @@ import type { zKeysResponseDto } from "./generated/notip-management-api-openapi.
 
 export type EncryptedEnvelopeDTO = z.infer<typeof zEncryptedEnvelopeDto>;
 export type QueryResponseDTO = z.infer<typeof zQueryResponseDto>;
-export type SensorDTO = z.infer<typeof zSensorDto>;
 export type KeyDTO = z.infer<typeof zKeysResponseDto>;
 
 // ---------------------------------------------------------------------------
@@ -70,11 +68,4 @@ export interface KeyModel {
     gatewayId: string;
     keyVersion: number;
     keyMaterial: string;
-}
-
-export interface SensorModel {
-    sensorId: string;
-    sensorType: string;
-    gatewayId: string;
-    lastSeen: string;
 }
