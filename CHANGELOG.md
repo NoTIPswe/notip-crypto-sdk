@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/NoTIPswe/notip-crypto-sdk/compare/v1.0.0...v1.1.0) (2026-04-01)
+
+
+### Features
+
+* add AbortSignal support to DataApiSseClient and DataApiService stream methods ([c3c04cd](https://github.com/NoTIPswe/notip-crypto-sdk/commit/c3c04cdf4730d4f350b79e8a5bf35e7cfa71f29b))
+
 # 1.0.0 (2026-04-01)
 
 
