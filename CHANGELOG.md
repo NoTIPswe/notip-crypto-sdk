@@ -1,3 +1,10 @@
+## [1.1.2](https://github.com/NoTIPswe/notip-crypto-sdk/compare/v1.1.1...v1.1.2) (2026-04-02)
+
+
+### Bug Fixes
+
+* update exports configuration in package.json for module compatibility ([45c73d7](https://github.com/NoTIPswe/notip-crypto-sdk/commit/45c73d7e4def01020c5b46cd016001fd11f9e42d))
+
 ## [1.1.1](https://github.com/NoTIPswe/notip-crypto-sdk/compare/v1.1.0...v1.1.1) (2026-04-01)
 
 
