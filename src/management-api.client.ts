@@ -4,7 +4,15 @@ import { zKeysControllerGetKeysResponse } from "./generated/notip-management-api
 import { authorizedFetch } from "./http.js";
 import type { KeyDTO } from "./models.js";
 
-export class ManagementApiClient {
+export interface AllKeysFetcher {
+    getAllKeys(): Promise<KeyDTO[]>;
+}
+
+export interface GatewayKeyFetcher {
+    getGatewayKey(gatewayId: string, version: number): Promise<KeyDTO>;
+}
+
+export class ManagementApiClient implements AllKeysFetcher, GatewayKeyFetcher {
     constructor(private readonly config: Config) {}
 
     async getAllKeys(): Promise<KeyDTO[]> {

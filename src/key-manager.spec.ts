@@ -1,8 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 import { KeyManager } from "./key-manager.js";
-import type { ManagementApiClient } from "./management-api.client.js";
-import type { KeyDTO } from "./models.js";
+import type { KeyModel, KeyProvider } from "./models.js";
 
 function makeKeyMaterial(): string {
     return btoa(
@@ -12,36 +11,32 @@ function makeKeyMaterial(): string {
     );
 }
 
-function createMockClient(): {
-    client: ManagementApiClient;
-    getGatewayKey: ReturnType<typeof vi.fn>;
+function createMockProvider(): {
+    provider: KeyProvider;
+    getKey: ReturnType<typeof vi.fn>;
 } {
-    const dto: KeyDTO = {
-        gateway_id: "gw-1",
-        key_material: makeKeyMaterial(),
-        key_version: 1,
+    const model: KeyModel = {
+        gatewayId: "gw-1",
+        keyVersion: 1,
+        keyMaterial: makeKeyMaterial(),
     };
 
-    const getGatewayKey = vi.fn().mockResolvedValue(dto);
+    const getKey = vi.fn().mockResolvedValue(model);
+    const provider: KeyProvider = { getKey };
 
-    const client = {
-        getAllKeys: vi.fn(),
-        getGatewayKey,
-    } as unknown as ManagementApiClient;
-
-    return { client, getGatewayKey };
+    return { provider, getKey };
 }
 
 describe("KeyManager", () => {
-    let client: ManagementApiClient;
-    let getGatewayKey: ReturnType<typeof vi.fn>;
+    let provider: KeyProvider;
+    let getKey: ReturnType<typeof vi.fn>;
     let manager: KeyManager;
 
     beforeEach(() => {
-        const mock = createMockClient();
-        client = mock.client;
-        getGatewayKey = mock.getGatewayKey;
-        manager = new KeyManager(client);
+        const mock = createMockProvider();
+        provider = mock.provider;
+        getKey = mock.getKey;
+        manager = new KeyManager(provider);
     });
 
     it("should fetch and import a key on cache miss", async () => {
@@ -50,7 +45,7 @@ describe("KeyManager", () => {
         expect(key).toBeInstanceOf(CryptoKey);
         expect(key.algorithm).toMatchObject({ name: "AES-GCM" });
         expect(key.usages).toContain("decrypt");
-        expect(getGatewayKey).toHaveBeenCalledWith("gw-1", 1);
+        expect(getKey).toHaveBeenCalledWith("gw-1", 1);
     });
 
     it("should return cached key on second call", async () => {
@@ -58,28 +53,28 @@ describe("KeyManager", () => {
         const key2 = await manager.getKey("gw-1", 1);
 
         expect(key1).toBe(key2);
-        expect(getGatewayKey).toHaveBeenCalledTimes(1);
+        expect(getKey).toHaveBeenCalledTimes(1);
     });
 
     it("should fetch different keys for different versions", async () => {
-        getGatewayKey.mockReset();
-        getGatewayKey
+        getKey.mockReset();
+        getKey
             .mockResolvedValueOnce({
-                gateway_id: "gw-1",
-                key_material: makeKeyMaterial(),
-                key_version: 1,
-            })
+                gatewayId: "gw-1",
+                keyVersion: 1,
+                keyMaterial: makeKeyMaterial(),
+            } satisfies KeyModel)
             .mockResolvedValueOnce({
-                gateway_id: "gw-1",
-                key_material: makeKeyMaterial(),
-                key_version: 2,
-            });
+                gatewayId: "gw-1",
+                keyVersion: 2,
+                keyMaterial: makeKeyMaterial(),
+            } satisfies KeyModel);
 
         const key1 = await manager.getKey("gw-1", 1);
         const key2 = await manager.getKey("gw-1", 2);
 
         expect(key1).not.toBe(key2);
-        expect(getGatewayKey).toHaveBeenCalledTimes(2);
+        expect(getKey).toHaveBeenCalledTimes(2);
     });
 
     it("should clear cache", async () => {
@@ -87,6 +82,6 @@ describe("KeyManager", () => {
         manager.clearCache();
         await manager.getKey("gw-1", 1);
 
-        expect(getGatewayKey).toHaveBeenCalledTimes(2);
+        expect(getKey).toHaveBeenCalledTimes(2);
     });
 });

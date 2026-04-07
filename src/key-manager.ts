@@ -1,4 +1,4 @@
-import type { ManagementApiClient } from "./management-api.client.js";
+import type { KeyProvider } from "./models.js";
 
 function base64ToBytes(base64: string): Uint8Array<ArrayBuffer> {
     const binary = atob(base64);
@@ -13,15 +13,15 @@ function base64ToBytes(base64: string): Uint8Array<ArrayBuffer> {
 export class KeyManager {
     private readonly cache = new Map<string, CryptoKey>();
 
-    constructor(private readonly mgmtClient: ManagementApiClient) {}
+    constructor(private readonly keyProvider: KeyProvider) {}
 
     async getKey(gatewayId: string, version: number): Promise<CryptoKey> {
         const cacheKey = `${gatewayId}-${version}`;
         const cached = this.cache.get(cacheKey);
         if (cached) return cached;
 
-        const dto = await this.mgmtClient.getGatewayKey(gatewayId, version);
-        const keyBytes = base64ToBytes(dto.key_material);
+        const keyModel = await this.keyProvider.getKey(gatewayId, version);
+        const keyBytes = base64ToBytes(keyModel.keyMaterial);
 
         const cryptoKey = await globalThis.crypto.subtle.importKey(
             "raw",

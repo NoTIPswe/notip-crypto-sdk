@@ -77,3 +77,7 @@ export interface KeyModel {
     keyVersion: number;
     keyMaterial: string;
 }
+
+export interface KeyProvider {
+    getKey(gatewayId: string, version: number): Promise<KeyModel>;
+}
