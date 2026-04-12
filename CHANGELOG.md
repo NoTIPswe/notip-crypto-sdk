@@ -1,3 +1,10 @@
+## [2.0.1](https://github.com/NoTIPswe/notip-crypto-sdk/compare/v2.0.0...v2.0.1) (2026-04-12)
+
+
+### Bug Fixes
+
+* add quality gate and coverage badges to README ([da6972a](https://github.com/NoTIPswe/notip-crypto-sdk/commit/da6972a75fa3987ca4d3fa07f629f50ea11f27f3))
+
 # [2.0.0](https://github.com/NoTIPswe/notip-crypto-sdk/compare/v1.1.2...v2.0.0) (2026-04-11)
 
 
