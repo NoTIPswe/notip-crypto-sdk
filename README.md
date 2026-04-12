@@ -1,5 +1,8 @@
 # @notip/crypto-sdk
 
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=NoTIPswe_notip-crypto-sdk&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=NoTIPswe_notip-crypto-sdk)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=NoTIPswe_notip-crypto-sdk&metric=coverage)](https://sonarcloud.io/summary/new_code?id=NoTIPswe_notip-crypto-sdk)
+
 Client-side decryption library for NoTIP telemetry payloads.
 
 Fetches encrypted sensor measurements from the NoTIP Data API, resolves the encryption keys from the Management API, and decrypts the data on the client using AES-GCM.
