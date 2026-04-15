@@ -1,11 +1,11 @@
 export type { Config } from "./config.js";
-export { MeasureClient } from "./measure-client.js";
+export { CryptoSdk } from "./crypto-sdk.js";
 
 export type {
     MeasureQuerier,
     MeasureStreamer,
     MeasureExporter,
-} from "./measure-client.js";
+} from "./crypto-sdk.js";
 
 export type {
     PlaintextMeasure,

@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeAll } from "vitest";
 
 import type { Config } from "../src/config.js";
 import { DecryptionError, SdkError } from "../src/errors.js";
-import { MeasureClient } from "../src/measure-client.js";
+import { CryptoSdk } from "../src/crypto-sdk.js";
 import type { EncryptedEnvelope } from "../src/models.js";
 
 vi.mock("@microsoft/fetch-event-source", () => ({
@@ -178,7 +178,7 @@ describe("MeasureClient integration", () => {
                 "/measures/query": () => ({ data: envelopes, hasMore: false }),
             });
 
-            const service = new MeasureClient(config);
+            const service = new CryptoSdk(config);
             const results = await service.queryMeasures({
                 from: "2026-01-01T00:00:00Z",
                 to: "2026-01-02T00:00:00Z",
@@ -219,7 +219,7 @@ describe("MeasureClient integration", () => {
                 }),
             });
 
-            const service = new MeasureClient(config);
+            const service = new CryptoSdk(config);
             const results = await service.queryMeasures({
                 from: "2026-01-01T00:00:00Z",
                 to: "2026-01-02T00:00:00Z",
@@ -269,7 +269,7 @@ describe("MeasureClient integration", () => {
                 }),
             });
 
-            const service = new MeasureClient(config);
+            const service = new CryptoSdk(config);
             const results = await service.queryMeasures({
                 from: "2026-01-01T00:00:00Z",
                 to: "2026-01-02T00:00:00Z",
@@ -313,7 +313,7 @@ describe("MeasureClient integration", () => {
                 );
             }) as Fetcher;
 
-            const service = new MeasureClient({
+            const service = new CryptoSdk({
                 baseUrl: "https://api.example.com",
                 tokenProvider: () => Promise.resolve("async-token"),
                 fetcher,
@@ -345,7 +345,7 @@ describe("MeasureClient integration", () => {
                 }),
             });
 
-            const service = new MeasureClient(config);
+            const service = new CryptoSdk(config);
             const result = await service.queryMeasures({
                 from: "2026-01-01T00:00:00Z",
                 to: "2026-01-02T00:00:00Z",
@@ -374,7 +374,7 @@ describe("MeasureClient integration", () => {
                 }),
             });
 
-            const service = new MeasureClient(config);
+            const service = new CryptoSdk(config);
             const result = await service.queryMeasures({
                 from: "2026-01-01T00:00:00Z",
                 to: "2026-01-02T00:00:00Z",
@@ -414,7 +414,7 @@ describe("MeasureClient integration", () => {
                 "/measures/export": () => envelopes,
             });
 
-            const service = new MeasureClient(config);
+            const service = new CryptoSdk(config);
             const results: string[] = [];
 
             for await (const measure of service.exportMeasures({
@@ -461,7 +461,7 @@ describe("MeasureClient integration", () => {
                 },
             });
 
-            const service = new MeasureClient(config);
+            const service = new CryptoSdk(config);
             const sensorIds: string[] = [];
 
             for await (const measure of service.streamMeasures({})) {
@@ -492,7 +492,7 @@ describe("MeasureClient integration", () => {
                 }),
             });
 
-            const service = new MeasureClient(config);
+            const service = new CryptoSdk(config);
 
             await expect(
                 service.queryMeasures({
@@ -522,7 +522,7 @@ describe("MeasureClient integration", () => {
                 }),
             });
 
-            const service = new MeasureClient(config);
+            const service = new CryptoSdk(config);
 
             await expect(
                 service.queryMeasures({

@@ -58,7 +58,7 @@ export interface MeasureExporter {
  * `for await...of` loop or pass an `AbortSignal` and call
  * `controller.abort()`.
  */
-export class MeasureClient
+export class CryptoSdk
     implements MeasureQuerier, MeasureStreamer, MeasureExporter
 {
     private readonly dataService: DataApiService;

@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeAll } from "vitest";
 import type { Config } from "./config.js";
 import { DataApiSseClient } from "./data-api-sse.client.js";
 import { ValidationError } from "./errors.js";
-import { MeasureClient } from "./measure-client.js";
+import { CryptoSdk } from "./crypto-sdk.js";
 import type { EncryptedEnvelope } from "./models.js";
 
 vi.mock("@microsoft/fetch-event-source", () => ({
@@ -164,7 +164,7 @@ describe("MeasureClient", () => {
                 ],
             });
 
-            const client = new MeasureClient(config);
+            const client = new CryptoSdk(config);
             const result = await client.queryMeasures({
                 from: "2026-01-01T00:00:00Z",
                 to: "2026-01-02T00:00:00Z",
@@ -189,7 +189,7 @@ describe("MeasureClient", () => {
                 "/keys": () => [],
             });
 
-            const client = new MeasureClient(config);
+            const client = new CryptoSdk(config);
 
             await expect(
                 client.queryMeasures({
@@ -216,7 +216,7 @@ describe("MeasureClient", () => {
                 ],
             });
 
-            const client = new MeasureClient(config);
+            const client = new CryptoSdk(config);
             const result = await client.queryMeasures({
                 from: "2026-01-01T00:00:00Z",
                 to: "2026-01-02T00:00:00Z",
@@ -256,7 +256,7 @@ describe("MeasureClient", () => {
                 ],
             });
 
-            const client = new MeasureClient(config);
+            const client = new CryptoSdk(config);
 
             await expect(
                 client.queryMeasures({
@@ -282,7 +282,7 @@ describe("MeasureClient", () => {
                 ],
             });
 
-            const client = new MeasureClient(config);
+            const client = new CryptoSdk(config);
             const results = [];
 
             for await (const measure of client.exportMeasures({
@@ -326,7 +326,7 @@ describe("MeasureClient", () => {
                 ],
             });
 
-            const client = new MeasureClient(config);
+            const client = new CryptoSdk(config);
             const results = [];
 
             for await (const measure of client.streamMeasures({})) {
@@ -347,7 +347,7 @@ describe("MeasureClient", () => {
                 .mockImplementation(async function* () {});
 
             const config = createConfig({});
-            const client = new MeasureClient(config);
+            const client = new CryptoSdk(config);
             const controller = new AbortController();
 
             await client.streamMeasures({}, controller.signal).next();
