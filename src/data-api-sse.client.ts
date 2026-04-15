@@ -5,55 +5,56 @@ import { SdkError, ValidationError } from "./errors";
 import { zEncryptedEnvelopeDto } from "./generated/notip-data-api-openapi";
 import type { EncryptedEnvelopeDTO } from "./dto";
 
-interface QueueItem<T> {
-    value?: T;
-    done: boolean;
-    error?: unknown;
-}
+type ChannelItem<T> =
+    | { type: "value"; value: T }
+    | { type: "error"; error: unknown }
+    | { type: "done" };
 
-function createChannel<T>(): {
+interface AsyncQueueChannel<T> {
     push: (value: T) => void;
     error: (err: unknown) => void;
     close: () => void;
     [Symbol.asyncIterator]: () => AsyncGenerator<T>;
-} {
-    const queue: QueueItem<T>[] = [];
-    let resolve: ((item: QueueItem<T>) => void) | null = null;
+}
 
-    function enqueue(item: QueueItem<T>): void {
-        if (resolve) {
-            const r = resolve;
-            resolve = null;
-            r(item);
+function createAsyncQueueChannel<T>(): AsyncQueueChannel<T> {
+    const queue: ChannelItem<T>[] = [];
+    let pendingPull: ((item: ChannelItem<T>) => void) | null = null;
+
+    function enqueue(item: ChannelItem<T>): void {
+        if (pendingPull) {
+            const resolvePull = pendingPull;
+            pendingPull = null;
+            resolvePull(item);
         } else {
             queue.push(item);
         }
     }
 
-    function pull(): Promise<QueueItem<T>> {
+    function pull(): Promise<ChannelItem<T>> {
         const next = queue.shift();
         if (next) return Promise.resolve(next);
-        return new Promise<QueueItem<T>>((r) => {
-            resolve = r;
+        return new Promise<ChannelItem<T>>((resolvePull) => {
+            pendingPull = resolvePull;
         });
     }
 
     return {
-        push: (value: T) => enqueue({ value, done: false }),
-        error: (err: unknown) => enqueue({ done: true, error: err }),
-        close: () => enqueue({ done: true }),
+        push: (value: T) => enqueue({ type: "value", value }),
+        error: (err: unknown) => enqueue({ type: "error", error: err }),
+        close: () => enqueue({ type: "done" }),
         async *[Symbol.asyncIterator]() {
             for (;;) {
                 const item = await pull();
-                if (item.error) {
+                if (item.type === "error") {
                     throw item.error instanceof Error
                         ? item.error
                         : new SdkError("SSE channel error", {
                               cause: item.error,
                           });
                 }
-                if (item.done) return;
-                yield item.value as T;
+                if (item.type === "done") return;
+                yield item.value;
             }
         },
     };
@@ -67,7 +68,7 @@ export class DataApiSseClient {
         signal?: AbortSignal
     ): AsyncGenerator<EncryptedEnvelopeDTO> {
         const token = await this.config.tokenProvider();
-        const channel = createChannel<EncryptedEnvelopeDTO>();
+        const channel = createAsyncQueueChannel<EncryptedEnvelopeDTO>();
         const abortController = new AbortController();
 
         signal?.addEventListener(
@@ -76,38 +77,61 @@ export class DataApiSseClient {
             { once: true }
         );
 
-        const fetchPromise = fetchEventSource(
+        const fetchPromise = this.startSseStream(
+            params,
+            token,
+            abortController.signal,
+            channel
+        );
+
+        try {
+            yield* channel[Symbol.asyncIterator]();
+        } finally {
+            abortController.abort();
+            await fetchPromise.catch(() => {});
+        }
+    }
+
+    private parseStreamEnvelope(data: string): EncryptedEnvelopeDTO {
+        let parsed: unknown;
+        try {
+            parsed = JSON.parse(data);
+        } catch (err) {
+            throw new ValidationError("Invalid stream envelope", {
+                cause: err,
+            });
+        }
+
+        const validated = zEncryptedEnvelopeDto.safeParse(parsed);
+        if (!validated.success) {
+            throw new ValidationError("Invalid stream envelope", {
+                cause: validated.error,
+            });
+        }
+
+        return validated.data;
+    }
+
+    private startSseStream(
+        params: string,
+        token: string,
+        signal: AbortSignal,
+        channel: AsyncQueueChannel<EncryptedEnvelopeDTO>
+    ): Promise<void> {
+        return fetchEventSource(
             `${this.config.baseUrl}/data/measures/stream?${params}`,
             {
                 headers: { Authorization: `Bearer ${token}` },
-                signal: abortController.signal,
+                signal,
                 fetch: this.config.fetcher,
                 openWhenHidden: true,
-                onmessage(ev) {
-                    if (ev.data) {
-                        try {
-                            const raw: unknown = JSON.parse(ev.data);
-                            const validated =
-                                zEncryptedEnvelopeDto.safeParse(raw);
-                            if (!validated.success) {
-                                channel.error(
-                                    new ValidationError(
-                                        "Invalid stream envelope",
-                                        {
-                                            cause: validated.error,
-                                        }
-                                    )
-                                );
-                                return;
-                            }
-                            channel.push(validated.data);
-                        } catch (err) {
-                            channel.error(
-                                new ValidationError("Invalid stream envelope", {
-                                    cause: err,
-                                })
-                            );
-                        }
+                onmessage: (ev) => {
+                    if (!ev.data) return;
+
+                    try {
+                        channel.push(this.parseStreamEnvelope(ev.data));
+                    } catch (err) {
+                        channel.error(err);
                     }
                 },
                 onclose() {
@@ -121,12 +145,5 @@ export class DataApiSseClient {
                 },
             }
         );
-
-        try {
-            yield* channel[Symbol.asyncIterator]();
-        } finally {
-            abortController.abort();
-            await fetchPromise.catch(() => {});
-        }
     }
 }
