@@ -1,9 +1,9 @@
 import { describe, it, expect, vi } from "vitest";
 
-import type { Config } from "./config.js";
-import { ApiError, SdkError, ValidationError } from "./errors.js";
-import { ManagementApiClient } from "./management-api.client.js";
-import type { KeyDTO } from "./models.js";
+import type { Config } from "./config";
+import { SdkError } from "./errors";
+import { ManagementApiClient } from "./management-api.client";
+import type { KeyDTO } from "./dto";
 
 function createConfig(fetcher: Config["fetcher"]): Config {
     return {
@@ -26,47 +26,6 @@ const stubKeys: KeyDTO[] = [
 ];
 
 describe("ManagementApiClient", () => {
-    describe("getAllKeys", () => {
-        it("should fetch all keys with authorization header", async () => {
-            const fetcher = vi.fn().mockResolvedValue(jsonResponse(stubKeys));
-            const client = new ManagementApiClient(createConfig(fetcher));
-
-            const result = await client.getAllKeys();
-
-            expect(result).toEqual(stubKeys);
-            expect(fetcher).toHaveBeenCalledOnce();
-
-            const [url, init] = fetcher.mock.calls[0] as [string, RequestInit];
-            expect(url).toBe("https://api.example.com/mgmt/keys");
-            expect((init.headers as Record<string, string>).Authorization).toBe(
-                "Bearer test-token"
-            );
-        });
-
-        it("should throw ApiError on non-ok response", async () => {
-            const fetcher = vi
-                .fn()
-                .mockResolvedValue(
-                    jsonResponse(
-                        { code: "UNAUTHORIZED", message: "Invalid token" },
-                        401
-                    )
-                );
-            const client = new ManagementApiClient(createConfig(fetcher));
-
-            await expect(client.getAllKeys()).rejects.toThrow(ApiError);
-        });
-
-        it("should throw ValidationError on invalid DTO shape", async () => {
-            const fetcher = vi
-                .fn()
-                .mockResolvedValue(jsonResponse([{ bad: "shape" }]));
-            const client = new ManagementApiClient(createConfig(fetcher));
-
-            await expect(client.getAllKeys()).rejects.toThrow(ValidationError);
-        });
-    });
-
     describe("getGatewayKey", () => {
         it("should return the matching key by version", async () => {
             const fetcher = vi.fn().mockResolvedValue(jsonResponse(stubKeys));

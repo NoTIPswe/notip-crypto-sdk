@@ -1,6 +1,6 @@
-import type { DataApiRestClient } from "./data-api-rest.client.js";
-import type { DataApiSseClient } from "./data-api-sse.client.js";
-import type { EncryptedEnvelopeDTO, QueryResponseDTO } from "./models.js";
+import type { DataApiRestClient } from "./data-api-rest.client";
+import type { DataApiSseClient } from "./data-api-sse.client";
+import type { EncryptedEnvelope, EncryptedQueryResponse } from "./models";
 
 export class DataApiService {
     constructor(
@@ -8,18 +8,18 @@ export class DataApiService {
         private readonly sseClient: DataApiSseClient
     ) {}
 
-    async query(params: string): Promise<QueryResponseDTO> {
+    async query(params: string): Promise<EncryptedQueryResponse> {
         return this.restClient.query(params);
     }
 
     async *stream(
         params: string,
         signal?: AbortSignal
-    ): AsyncGenerator<EncryptedEnvelopeDTO> {
+    ): AsyncGenerator<EncryptedEnvelope> {
         yield* this.sseClient.stream(params, signal);
     }
 
-    async export(params: string): Promise<EncryptedEnvelopeDTO[]> {
+    async export(params: string): Promise<EncryptedEnvelope[]> {
         return this.restClient.export(params);
     }
 }

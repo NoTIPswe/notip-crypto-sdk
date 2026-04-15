@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeAll } from "vitest";
 
 import type { Config } from "../src/config.js";
-import { CryptoSdk } from "../src/crypto-sdk.js";
 import { DecryptionError, SdkError } from "../src/errors.js";
-import type { EncryptedEnvelopeDTO } from "../src/models.js";
+import { CryptoSdk } from "../src/crypto-sdk.js";
+import type { EncryptedEnvelope } from "../src/models.js";
 
 vi.mock("@microsoft/fetch-event-source", () => ({
     fetchEventSource: vi.fn(),
@@ -77,8 +77,8 @@ async function encryptWith(
 
 async function makeEnvelope(
     key: CryptoKey,
-    overrides?: Partial<EncryptedEnvelopeDTO>
-): Promise<EncryptedEnvelopeDTO> {
+    overrides?: Partial<EncryptedEnvelope>
+): Promise<EncryptedEnvelope> {
     const { encryptedHex, ivHex, authTagHex } = await encryptWith(key, {
         value: 23.5,
         unit: "°C",
@@ -142,7 +142,7 @@ function createConfig(
 
 // ---- Tests ----
 
-describe("CryptoSdk integration", () => {
+describe("MeasureClient integration", () => {
     let gw1v1: KeyFixture;
     let gw1v2: KeyFixture;
     let gw2v1: KeyFixture;
