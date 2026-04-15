@@ -1,7 +1,7 @@
 import { z } from "zod";
 
-import { ValidationError } from "./errors.js";
-import type { SensorData } from "./models.js";
+import { ValidationError } from "./errors";
+import type { SensorData } from "./models";
 
 const zSensorData = z.object({
     value: z.number(),

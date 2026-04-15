@@ -1,9 +1,9 @@
 import { describe, it, expect, vi } from "vitest";
 
-import type { Config } from "./config.js";
-import { SdkError } from "./errors.js";
-import { ManagementApiClient } from "./management-api.client.js";
-import type { KeyDTO } from "./dto.js";
+import type { Config } from "./config";
+import { SdkError } from "./errors";
+import { ManagementApiClient } from "./management-api.client";
+import type { KeyDTO } from "./dto";
 
 function createConfig(fetcher: Config["fetcher"]): Config {
     return {

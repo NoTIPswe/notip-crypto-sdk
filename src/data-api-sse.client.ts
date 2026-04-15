@@ -1,9 +1,9 @@
 import { fetchEventSource } from "@microsoft/fetch-event-source";
 
-import type { Config } from "./config.js";
-import { SdkError, ValidationError } from "./errors.js";
-import { zEncryptedEnvelopeDto } from "./generated/notip-data-api-openapi.js";
-import type { EncryptedEnvelopeDTO } from "./dto.js";
+import type { Config } from "./config";
+import { SdkError, ValidationError } from "./errors";
+import { zEncryptedEnvelopeDto } from "./generated/notip-data-api-openapi";
+import type { EncryptedEnvelopeDTO } from "./dto";
 
 interface QueueItem<T> {
     value?: T;

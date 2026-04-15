@@ -1,11 +1,11 @@
-import type { Config } from "./config.js";
-import { CryptoEngine } from "./crypto-engine.js";
-import { DataApiRestClient } from "./data-api-rest.client.js";
-import { DataApiSseClient } from "./data-api-sse.client.js";
-import { DataApiService } from "./data-api.service.js";
-import { KeyManager } from "./key-manager.js";
-import { ManagementApiClient } from "./management-api.client.js";
-import { ManagementApiService } from "./management-api.service.js";
+import type { Config } from "./config";
+import { CryptoEngine } from "./crypto-engine";
+import { DataApiRestClient } from "./data-api-rest.client";
+import { DataApiSseClient } from "./data-api-sse.client";
+import { DataApiService } from "./data-api.service";
+import { KeyManager } from "./key-manager";
+import { ManagementApiClient } from "./management-api.client";
+import { ManagementApiService } from "./management-api.service";
 import type {
     EncryptedEnvelope,
     ExportModel,
@@ -13,8 +13,8 @@ import type {
     QueryModel,
     QueryResponsePage,
     StreamModel,
-} from "./models.js";
-import { parseSensorData } from "./validation.js";
+} from "./models";
+import { parseSensorData } from "./validation";
 
 function toSearchParams(obj: QueryModel | StreamModel | ExportModel): string {
     const params = new URLSearchParams();

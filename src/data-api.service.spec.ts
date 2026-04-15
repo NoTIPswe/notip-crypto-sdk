@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 
-import { DataApiService } from "./data-api.service.js";
-import type { EncryptedEnvelope, EncryptedQueryResponse } from "./models.js";
+import { DataApiService } from "./data-api.service";
+import type { EncryptedEnvelope, EncryptedQueryResponse } from "./models";
 
 const stubEnvelope: EncryptedEnvelope = {
     gatewayId: "gw-1",

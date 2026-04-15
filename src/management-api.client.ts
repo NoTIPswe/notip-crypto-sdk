@@ -1,8 +1,8 @@
-import type { Config } from "./config.js";
-import { SdkError, ValidationError } from "./errors.js";
-import { zKeysControllerGetKeysResponse } from "./generated/notip-management-api-openapi.js";
-import { authorizedFetch } from "./http.js";
-import type { KeyDTO } from "./dto.js";
+import type { Config } from "./config";
+import { SdkError, ValidationError } from "./errors";
+import { zKeysControllerGetKeysResponse } from "./generated/notip-management-api-openapi";
+import { authorizedFetch } from "./http";
+import type { KeyDTO } from "./dto";
 
 export interface GatewayKeyFetcher {
     getGatewayKey(gatewayId: string, version: number): Promise<KeyDTO>;

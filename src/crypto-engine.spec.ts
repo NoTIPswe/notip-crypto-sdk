@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 
-import { CryptoEngine } from "./crypto-engine.js";
-import { DecryptionError } from "./errors.js";
+import { CryptoEngine } from "./crypto-engine";
+import { DecryptionError } from "./errors";
 
 function bytesToHex(bytes: Uint8Array): string {
     return Array.from(bytes)

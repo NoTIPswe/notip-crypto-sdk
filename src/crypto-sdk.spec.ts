@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeAll } from "vitest";
 
-import type { Config } from "./config.js";
-import { DataApiSseClient } from "./data-api-sse.client.js";
-import { ValidationError } from "./errors.js";
-import { CryptoSdk } from "./crypto-sdk.js";
-import type { EncryptedEnvelope } from "./models.js";
+import type { Config } from "./config";
+import { DataApiSseClient } from "./data-api-sse.client";
+import { ValidationError } from "./errors";
+import { CryptoSdk } from "./crypto-sdk";
+import type { EncryptedEnvelope } from "./models";
 
 vi.mock("@microsoft/fetch-event-source", () => ({
     fetchEventSource: vi.fn(),

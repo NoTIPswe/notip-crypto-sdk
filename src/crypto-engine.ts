@@ -1,13 +1,4 @@
-import { DecryptionError } from "./errors.js";
-
-function hexToBytes(hex: string): Uint8Array<ArrayBuffer> {
-    const buffer = new ArrayBuffer(hex.length / 2);
-    const bytes = new Uint8Array(buffer);
-    for (let i = 0; i < hex.length; i += 2) {
-        bytes[i / 2] = Number.parseInt(hex.substring(i, i + 2), 16);
-    }
-    return bytes;
-}
+import { DecryptionError } from "./errors";
 
 export class CryptoEngine {
     async decrypt(
@@ -17,9 +8,9 @@ export class CryptoEngine {
         authTagHex: string
     ): Promise<unknown> {
         try {
-            const ciphertext = hexToBytes(encryptedHex);
-            const iv = hexToBytes(ivHex);
-            const authTag = hexToBytes(authTagHex);
+            const ciphertext = this.hexToBytes(encryptedHex);
+            const iv = this.hexToBytes(ivHex);
+            const authTag = this.hexToBytes(authTagHex);
 
             // AES-GCM expects ciphertext || authTag as input
             const combined = new Uint8Array(ciphertext.length + authTag.length);
@@ -37,5 +28,14 @@ export class CryptoEngine {
         } catch (error) {
             throw new DecryptionError("Decryption failed", { cause: error });
         }
+    }
+
+    private hexToBytes(hex: string): Uint8Array<ArrayBuffer> {
+        const buffer = new ArrayBuffer(hex.length / 2);
+        const bytes = new Uint8Array(buffer);
+        for (let i = 0; i < hex.length; i += 2) {
+            bytes[i / 2] = Number.parseInt(hex.substring(i, i + 2), 16);
+        }
+        return bytes;
     }
 }

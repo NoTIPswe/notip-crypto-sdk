@@ -1,9 +1,9 @@
 import { describe, it, expect, vi } from "vitest";
 
-import type { Config } from "./config.js";
-import { DataApiRestClient } from "./data-api-rest.client.js";
-import { ApiError, ValidationError } from "./errors.js";
-import type { EncryptedEnvelopeDTO, QueryResponseDTO } from "./dto.js";
+import type { Config } from "./config";
+import { DataApiRestClient } from "./data-api-rest.client";
+import { ApiError, ValidationError } from "./errors";
+import type { EncryptedEnvelopeDTO, QueryResponseDTO } from "./dto";
 
 function createConfig(fetcher: Config["fetcher"]): Config {
     return {

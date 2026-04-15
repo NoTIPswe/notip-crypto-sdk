@@ -1,11 +1,11 @@
-import type { Config } from "./config.js";
-import { ValidationError } from "./errors.js";
+import type { Config } from "./config";
+import { ValidationError } from "./errors";
 import {
     zMeasureControllerExportResponse,
     zQueryResponseDto,
-} from "./generated/notip-data-api-openapi.js";
-import { authorizedFetch } from "./http.js";
-import type { EncryptedEnvelopeDTO, QueryResponseDTO } from "./dto.js";
+} from "./generated/notip-data-api-openapi";
+import { authorizedFetch } from "./http";
+import type { EncryptedEnvelopeDTO, QueryResponseDTO } from "./dto";
 
 export class DataApiRestClient {
     constructor(private readonly config: Config) {}

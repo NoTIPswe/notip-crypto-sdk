@@ -1,5 +1,5 @@
-import type { Config } from "./config.js";
-import { ApiError } from "./errors.js";
+import type { Config } from "./config";
+import { ApiError } from "./errors";
 
 export async function authorizedFetch(
     config: Config,

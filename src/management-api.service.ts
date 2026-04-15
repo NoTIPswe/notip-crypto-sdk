@@ -1,6 +1,6 @@
-import type { KeyProvider } from "./key-provider.js";
-import type { GatewayKeyFetcher } from "./management-api.client.js";
-import type { KeyModel } from "./models.js";
+import type { KeyProvider } from "./key-provider";
+import type { GatewayKeyFetcher } from "./management-api.client";
+import type { KeyModel } from "./models";
 
 export class ManagementApiService implements KeyProvider {
     constructor(private readonly apiClient: GatewayKeyFetcher) {}

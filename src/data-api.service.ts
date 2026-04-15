@@ -1,6 +1,6 @@
-import type { DataApiRestClient } from "./data-api-rest.client.js";
-import type { DataApiSseClient } from "./data-api-sse.client.js";
-import type { EncryptedEnvelope, EncryptedQueryResponse } from "./models.js";
+import type { DataApiRestClient } from "./data-api-rest.client";
+import type { DataApiSseClient } from "./data-api-sse.client";
+import type { EncryptedEnvelope, EncryptedQueryResponse } from "./models";
 
 export class DataApiService {
     constructor(

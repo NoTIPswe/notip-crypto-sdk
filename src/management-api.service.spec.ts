@@ -1,9 +1,9 @@
 import { describe, it, expect, vi } from "vitest";
 
-import { SdkError } from "./errors.js";
-import type { GatewayKeyFetcher } from "./management-api.client.js";
-import { ManagementApiService } from "./management-api.service.js";
-import type { KeyDTO } from "./dto.js";
+import { SdkError } from "./errors";
+import type { GatewayKeyFetcher } from "./management-api.client";
+import { ManagementApiService } from "./management-api.service";
+import type { KeyDTO } from "./dto";
 
 const stubKeys: KeyDTO[] = [
     { gateway_id: "gw-1", key_material: "dGVzdC1rZXk=", key_version: 1 },
