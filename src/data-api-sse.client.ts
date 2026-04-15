@@ -3,7 +3,7 @@ import { fetchEventSource } from "@microsoft/fetch-event-source";
 import type { Config } from "./config.js";
 import { SdkError, ValidationError } from "./errors.js";
 import { zEncryptedEnvelopeDto } from "./generated/notip-data-api-openapi.js";
-import type { EncryptedEnvelopeDTO } from "./models.js";
+import type { EncryptedEnvelopeDTO } from "./dto.js";
 
 interface QueueItem<T> {
     value?: T;

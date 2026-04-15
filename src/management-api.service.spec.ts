@@ -1,12 +1,9 @@
 import { describe, it, expect, vi } from "vitest";
 
 import { SdkError } from "./errors.js";
-import type {
-    AllKeysFetcher,
-    GatewayKeyFetcher,
-} from "./management-api.client.js";
+import type { GatewayKeyFetcher } from "./management-api.client.js";
 import { ManagementApiService } from "./management-api.service.js";
-import type { KeyDTO } from "./models.js";
+import type { KeyDTO } from "./dto.js";
 
 const stubKeys: KeyDTO[] = [
     { gateway_id: "gw-1", key_material: "dGVzdC1rZXk=", key_version: 1 },
@@ -14,38 +11,14 @@ const stubKeys: KeyDTO[] = [
 ];
 
 function createMockClient() {
-    const getAllKeys = vi.fn().mockResolvedValue(stubKeys);
     const getGatewayKey = vi.fn();
 
-    const client = { getAllKeys, getGatewayKey } as AllKeysFetcher &
-        GatewayKeyFetcher;
+    const client = { getGatewayKey } as GatewayKeyFetcher;
 
-    return { client, getAllKeys, getGatewayKey };
+    return { client, getGatewayKey };
 }
 
 describe("ManagementApiService", () => {
-    describe("getKeysModel", () => {
-        it("should validate and map keys to KeyModel", async () => {
-            const { client } = createMockClient();
-            const service = new ManagementApiService(client);
-
-            const result = await service.getKeysModel();
-
-            expect(result).toEqual([
-                {
-                    gatewayId: "gw-1",
-                    keyVersion: 1,
-                    keyMaterial: "dGVzdC1rZXk=",
-                },
-                {
-                    gatewayId: "gw-2",
-                    keyVersion: 2,
-                    keyMaterial: "dGVzdC1rZXky",
-                },
-            ]);
-        });
-    });
-
     describe("getKey", () => {
         it("should fetch a single key and map to KeyModel", async () => {
             const { client, getGatewayKey } = createMockClient();

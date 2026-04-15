@@ -3,7 +3,7 @@ import { describe, it, expect, vi } from "vitest";
 import type { Config } from "./config.js";
 import { DataApiRestClient } from "./data-api-rest.client.js";
 import { ApiError, ValidationError } from "./errors.js";
-import type { EncryptedEnvelopeDTO, QueryResponseDTO } from "./models.js";
+import type { EncryptedEnvelopeDTO, QueryResponseDTO } from "./dto.js";
 
 function createConfig(fetcher: Config["fetcher"]): Config {
     return {

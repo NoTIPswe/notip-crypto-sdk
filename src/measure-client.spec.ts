@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeAll } from "vitest";
 
 import type { Config } from "./config.js";
-import { CryptoSdk } from "./crypto-sdk.js";
 import { DataApiSseClient } from "./data-api-sse.client.js";
 import { ValidationError } from "./errors.js";
-import type { EncryptedEnvelopeDTO } from "./models.js";
+import { MeasureClient } from "./measure-client.js";
+import type { EncryptedEnvelope } from "./models.js";
 
 vi.mock("@microsoft/fetch-event-source", () => ({
     fetchEventSource: vi.fn(),
@@ -77,8 +77,8 @@ async function encryptPayload(
 }
 
 async function makeEnvelope(
-    overrides?: Partial<EncryptedEnvelopeDTO>
-): Promise<EncryptedEnvelopeDTO> {
+    overrides?: Partial<EncryptedEnvelope>
+): Promise<EncryptedEnvelope> {
     const { encryptedHex, ivHex, authTagHex } = await encryptPayload({
         value: 23.5,
         unit: "°C",
@@ -144,7 +144,7 @@ function createConfig(routes: Record<string, () => unknown>): Config {
     };
 }
 
-describe("CryptoSdk", () => {
+describe("MeasureClient", () => {
     describe("queryMeasures", () => {
         it("should decrypt and return plaintext measures", async () => {
             const envelope = await makeEnvelope();
@@ -164,8 +164,8 @@ describe("CryptoSdk", () => {
                 ],
             });
 
-            const sdk = new CryptoSdk(config);
-            const result = await sdk.queryMeasures({
+            const client = new MeasureClient(config);
+            const result = await client.queryMeasures({
                 from: "2026-01-01T00:00:00Z",
                 to: "2026-01-02T00:00:00Z",
             });
@@ -189,10 +189,10 @@ describe("CryptoSdk", () => {
                 "/keys": () => [],
             });
 
-            const sdk = new CryptoSdk(config);
+            const client = new MeasureClient(config);
 
             await expect(
-                sdk.queryMeasures({
+                client.queryMeasures({
                     from: "2026-01-01T00:00:00Z",
                     to: "2026-01-02T00:00:00Z",
                 })
@@ -216,8 +216,8 @@ describe("CryptoSdk", () => {
                 ],
             });
 
-            const sdk = new CryptoSdk(config);
-            const result = await sdk.queryMeasures({
+            const client = new MeasureClient(config);
+            const result = await client.queryMeasures({
                 from: "2026-01-01T00:00:00Z",
                 to: "2026-01-02T00:00:00Z",
             });
@@ -231,7 +231,7 @@ describe("CryptoSdk", () => {
                 wrong: "shape",
             });
 
-            const envelope: EncryptedEnvelopeDTO = {
+            const envelope: EncryptedEnvelope = {
                 gatewayId: "gw-1",
                 sensorId: "sensor-1",
                 sensorType: "temperature",
@@ -256,10 +256,10 @@ describe("CryptoSdk", () => {
                 ],
             });
 
-            const sdk = new CryptoSdk(config);
+            const client = new MeasureClient(config);
 
             await expect(
-                sdk.queryMeasures({
+                client.queryMeasures({
                     from: "2026-01-01T00:00:00Z",
                     to: "2026-01-02T00:00:00Z",
                 })
@@ -282,10 +282,10 @@ describe("CryptoSdk", () => {
                 ],
             });
 
-            const sdk = new CryptoSdk(config);
+            const client = new MeasureClient(config);
             const results = [];
 
-            for await (const measure of sdk.exportMeasures({
+            for await (const measure of client.exportMeasures({
                 from: "2026-01-01T00:00:00Z",
                 to: "2026-01-02T00:00:00Z",
             })) {
@@ -326,10 +326,10 @@ describe("CryptoSdk", () => {
                 ],
             });
 
-            const sdk = new CryptoSdk(config);
+            const client = new MeasureClient(config);
             const results = [];
 
-            for await (const measure of sdk.streamMeasures({})) {
+            for await (const measure of client.streamMeasures({})) {
                 results.push(measure);
             }
 
@@ -347,10 +347,10 @@ describe("CryptoSdk", () => {
                 .mockImplementation(async function* () {});
 
             const config = createConfig({});
-            const sdk = new CryptoSdk(config);
+            const client = new MeasureClient(config);
             const controller = new AbortController();
 
-            await sdk.streamMeasures({}, controller.signal).next();
+            await client.streamMeasures({}, controller.signal).next();
 
             expect(streamSpy).toHaveBeenCalledWith(
                 expect.any(String),

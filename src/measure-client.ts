@@ -3,19 +3,18 @@ import { CryptoEngine } from "./crypto-engine.js";
 import { DataApiRestClient } from "./data-api-rest.client.js";
 import { DataApiSseClient } from "./data-api-sse.client.js";
 import { DataApiService } from "./data-api.service.js";
-import { ValidationError } from "./errors.js";
 import { KeyManager } from "./key-manager.js";
 import { ManagementApiClient } from "./management-api.client.js";
 import { ManagementApiService } from "./management-api.service.js";
 import type {
-    EncryptedEnvelopeDTO,
+    EncryptedEnvelope,
     ExportModel,
     PlaintextMeasure,
     QueryModel,
     QueryResponsePage,
     StreamModel,
 } from "./models.js";
-import { zSensorData } from "./models.js";
+import { parseSensorData } from "./validation.js";
 
 function toSearchParams(obj: QueryModel | StreamModel | ExportModel): string {
     const params = new URLSearchParams();
@@ -59,7 +58,7 @@ export interface MeasureExporter {
  * `for await...of` loop or pass an `AbortSignal` and call
  * `controller.abort()`.
  */
-export class CryptoSdk
+export class MeasureClient
     implements MeasureQuerier, MeasureStreamer, MeasureExporter
 {
     private readonly dataService: DataApiService;
@@ -111,7 +110,7 @@ export class CryptoSdk
     }
 
     private async decryptEnvelope(
-        envelope: EncryptedEnvelopeDTO
+        envelope: EncryptedEnvelope
     ): Promise<PlaintextMeasure> {
         const key = await this.keyManager.getKey(
             envelope.gatewayId,
@@ -125,20 +124,15 @@ export class CryptoSdk
             envelope.authTag
         );
 
-        const sensorData = zSensorData.safeParse(decrypted);
-        if (!sensorData.success) {
-            throw new ValidationError("Invalid decrypted sensor data", {
-                cause: sensorData.error,
-            });
-        }
+        const sensorData = parseSensorData(decrypted);
 
         return {
             gatewayId: envelope.gatewayId,
             sensorId: envelope.sensorId,
             sensorType: envelope.sensorType,
             timestamp: envelope.timestamp,
-            value: sensorData.data.value,
-            unit: sensorData.data.unit,
+            value: sensorData.value,
+            unit: sensorData.unit,
         };
     }
 }

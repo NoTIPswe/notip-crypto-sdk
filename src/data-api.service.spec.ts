@@ -1,9 +1,9 @@
 import { describe, it, expect, vi } from "vitest";
 
 import { DataApiService } from "./data-api.service.js";
-import type { EncryptedEnvelopeDTO, QueryResponseDTO } from "./models.js";
+import type { EncryptedEnvelope, EncryptedQueryResponse } from "./models.js";
 
-const stubEnvelope: EncryptedEnvelopeDTO = {
+const stubEnvelope: EncryptedEnvelope = {
     gatewayId: "gw-1",
     sensorId: "sensor-1",
     sensorType: "temperature",
@@ -14,7 +14,7 @@ const stubEnvelope: EncryptedEnvelopeDTO = {
     keyVersion: 1,
 };
 
-const stubQueryResponse: QueryResponseDTO = {
+const stubQueryResponse: EncryptedQueryResponse = {
     data: [stubEnvelope],
     hasMore: false,
 };
@@ -61,7 +61,7 @@ describe("DataApiService", () => {
                 yield stubEnvelope;
             });
 
-            const results: EncryptedEnvelopeDTO[] = [];
+            const results: EncryptedEnvelope[] = [];
             for await (const e of service.stream("gatewayId=gw-1")) {
                 results.push(e);
             }

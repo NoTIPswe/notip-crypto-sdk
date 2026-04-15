@@ -1,4 +1,4 @@
-import type { KeyProvider } from "./models.js";
+import type { KeyProvider } from "./key-provider.js";
 
 function base64ToBytes(base64: string): Uint8Array<ArrayBuffer> {
     const binary = atob(base64);

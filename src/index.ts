@@ -1,18 +1,17 @@
 export type { Config } from "./config.js";
-export { CryptoSdk } from "./crypto-sdk.js";
+export { MeasureClient } from "./measure-client.js";
 
 export type {
     MeasureQuerier,
     MeasureStreamer,
     MeasureExporter,
-} from "./crypto-sdk.js";
+} from "./measure-client.js";
 
 export type {
     PlaintextMeasure,
     QueryResponsePage,
     SensorData,
     KeyModel,
-    KeyProvider,
     QueryModel,
     StreamModel,
     ExportModel,

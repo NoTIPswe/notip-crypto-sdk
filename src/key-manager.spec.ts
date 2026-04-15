@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
+import type { KeyProvider } from "./key-provider.js";
 import { KeyManager } from "./key-manager.js";
-import type { KeyModel, KeyProvider } from "./models.js";
+import type { KeyModel } from "./models.js";
 
 function makeKeyMaterial(): string {
     return btoa(

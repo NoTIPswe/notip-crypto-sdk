@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { Config } from "./config.js";
 import { DataApiSseClient } from "./data-api-sse.client.js";
 import { ValidationError } from "./errors.js";
-import type { EncryptedEnvelopeDTO } from "./models.js";
+import type { EncryptedEnvelopeDTO } from "./dto.js";
 
 vi.mock("@microsoft/fetch-event-source", () => ({
     fetchEventSource: vi.fn(),

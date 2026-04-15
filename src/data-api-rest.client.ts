@@ -5,7 +5,7 @@ import {
     zQueryResponseDto,
 } from "./generated/notip-data-api-openapi.js";
 import { authorizedFetch } from "./http.js";
-import type { EncryptedEnvelopeDTO, QueryResponseDTO } from "./models.js";
+import type { EncryptedEnvelopeDTO, QueryResponseDTO } from "./dto.js";
 
 export class DataApiRestClient {
     constructor(private readonly config: Config) {}

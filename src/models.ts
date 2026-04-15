@@ -1,19 +1,3 @@
-import { z } from "zod";
-
-import type {
-    zEncryptedEnvelopeDto,
-    zQueryResponseDto,
-} from "./generated/notip-data-api-openapi.js";
-import type { zKeysResponseDto } from "./generated/notip-management-api-openapi.js";
-
-// ---------------------------------------------------------------------------
-// DTO type aliases (inferred from generated Zod schemas)
-// ---------------------------------------------------------------------------
-
-export type EncryptedEnvelopeDTO = z.infer<typeof zEncryptedEnvelopeDto>;
-export type QueryResponseDTO = z.infer<typeof zQueryResponseDto>;
-export type KeyDTO = z.infer<typeof zKeysResponseDto>;
-
 // ---------------------------------------------------------------------------
 // Domain input models
 // ---------------------------------------------------------------------------
@@ -43,41 +27,56 @@ export interface ExportModel {
 }
 
 // ---------------------------------------------------------------------------
-// Domain output models + Zod schemas
+// Domain output models
 // ---------------------------------------------------------------------------
 
-export const zSensorData = z.object({
-    value: z.number(),
-    unit: z.string(),
-});
+export interface SensorData {
+    value: number;
+    unit: string;
+}
 
-export type SensorData = z.infer<typeof zSensorData>;
+export interface PlaintextMeasure {
+    gatewayId: string;
+    sensorId: string;
+    sensorType: string;
+    timestamp: string;
+    value: number;
+    unit: string;
+}
 
-export const zPlaintextMeasure = z.object({
-    gatewayId: z.string(),
-    sensorId: z.string(),
-    sensorType: z.string(),
-    timestamp: z.string(),
-    value: z.number(),
-    unit: z.string(),
-});
+export interface QueryResponsePage {
+    data: PlaintextMeasure[];
+    nextCursor?: string;
+    hasMore: boolean;
+}
 
-export type PlaintextMeasure = z.infer<typeof zPlaintextMeasure>;
+// ---------------------------------------------------------------------------
+// Encrypted envelope models
+// ---------------------------------------------------------------------------
 
-export const zQueryResponsePage = z.object({
-    data: z.array(zPlaintextMeasure),
-    nextCursor: z.string().optional(),
-    hasMore: z.boolean(),
-});
+export interface EncryptedEnvelope {
+    gatewayId: string;
+    sensorId: string;
+    sensorType: string;
+    timestamp: string;
+    encryptedData: string;
+    iv: string;
+    authTag: string;
+    keyVersion: number;
+}
 
-export type QueryResponsePage = z.infer<typeof zQueryResponsePage>;
+export interface EncryptedQueryResponse {
+    data: EncryptedEnvelope[];
+    nextCursor?: string;
+    hasMore: boolean;
+}
+
+// ---------------------------------------------------------------------------
+// Key models
+// ---------------------------------------------------------------------------
 
 export interface KeyModel {
     gatewayId: string;
     keyVersion: number;
     keyMaterial: string;
-}
-
-export interface KeyProvider {
-    getKey(gatewayId: string, version: number): Promise<KeyModel>;
 }
